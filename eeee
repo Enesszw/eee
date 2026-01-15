@@ -44,6 +44,11 @@ local Configuration = {
         Body = 13,
         Small = 11,
         Tiny = 12
+    },
+    Settings = {
+        TweenSpeed = 0.3,
+        TweenStyle = Enum.EasingStyle.Quint,
+        DraggingSpeed = 0.05
     }
 }
 
@@ -79,7 +84,11 @@ local Utils = {}
 function Utils.Tween(obj, props, time, style, dir)
     local t = TweenService:Create(
         obj,
-        TweenInfo.new(time or 0.3, style or Enum.EasingStyle.Quint, dir or Enum.EasingDirection.Out),
+        TweenInfo.new(
+            time or Configuration.Settings.TweenSpeed, 
+            style or Configuration.Settings.TweenStyle, 
+            dir or Enum.EasingDirection.Out
+        ),
         props
     )
     t:Play()
@@ -114,19 +123,22 @@ function Utils.CreateGradient(parent, color1, color2, rotation)
     return gradient
 end
 
-function Utils.SetBlur(enabled)
-    local blur = Lighting:FindFirstChild("JunkieBlur")
-    if enabled then
+local function SetBlur(state)
+    local blur = Lighting:FindFirstChild("GlassBlur")
+    if state then
         if not blur then
             blur = Instance.new("BlurEffect")
-            blur.Name = "JunkieBlur"
-            blur.Size = 0
+            blur.Name = "GlassBlur"
             blur.Parent = Lighting
         end
-        Utils.Tween(blur, {Size = 24}, Configuration.Animations.Bounce)
+        Utils.Tween(blur, {Size = 10}, Configuration.Settings.TweenSpeed)
     elseif blur then
-        Utils.Tween(blur, {Size = 0}, Configuration.Animations.Medium)
-        task.delay(0.4, function() blur:Destroy() end)
+        Utils.Tween(blur, {Size = 0}, Configuration.Settings.TweenSpeed)
+        task.delay(Configuration.Settings.TweenSpeed, function() 
+            if Lighting:FindFirstChild("GlassBlur") and not state then
+                blur:Destroy() 
+            end
+        end)
     end
 end
 
@@ -153,7 +165,7 @@ function ToastSystem.Create(parent, message, toastType, duration, statusCode)
         warning = Icons.Warning,
         info = Icons.Info
     }
-    local toastColor = colors[toastType] or colors.Bg
+    local toastColor = colors[toastType] or Configuration.Colors.Bg
     local toastIcon = icons[toastType] or nil
 
     if #ToastSystem.ActiveToasts >= ToastSystem.MaxToasts then
@@ -247,6 +259,7 @@ function Library:CreateWindow(title, gameName)
     local screen = Instance.new("ScreenGui")
     screen.Name = Configuration.ScreenGuiName
     screen.ResetOnSpawn = false
+    screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     screen.Parent = game:GetService("CoreGui")
 
     local main = Instance.new("Frame")
@@ -274,7 +287,18 @@ function Library:CreateWindow(title, gameName)
         blur.Name = "GlassBlur"
         blur.Parent = game:GetService("Lighting")
     end
-    blur.Size = 10
+    SetBlur(true)
+
+    -- Toggle Logic --
+    local toggled = true
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        if gpe then return end
+        if input.KeyCode == Enum.KeyCode.RightShift or input.KeyCode == Enum.KeyCode.Insert then
+            toggled = not toggled
+            main.Visible = toggled
+            SetBlur(toggled)
+        end
+    end)
 
     -- Title Bar / Bar with Traffic Lights --
     local bar = Instance.new("Frame")
@@ -753,6 +777,11 @@ function Library:CreateWindow(title, gameName)
                 local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 10) or 44
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
                 Utils.Tween(arrow, {Rotation = state and 180 or 0}, 0.3)
+                
+                -- Force layout update
+                task.defer(function()
+                    tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage:FindFirstChildWhichIsA("UIListLayout").AbsoluteContentSize.Y + 30)
+                end)
             end
 
             local interact = Instance.new("TextButton")
@@ -837,6 +866,11 @@ function Library:CreateWindow(title, gameName)
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
                 Utils.Tween(arrow, {Rotation = state and 90 or 0}, 0.3)
                 Utils.Tween(container, {Size = UDim2.new(1, -20, 0, state and clist.AbsoluteContentSize.Y or 0)}, 0.3)
+                
+                -- Force layout update
+                task.defer(function()
+                    tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage:FindFirstChildWhichIsA("UIListLayout").AbsoluteContentSize.Y + 30)
+                end)
             end
 
             local interact = Instance.new("TextButton")
@@ -1074,6 +1108,7 @@ function Library:CreateWindow(title, gameName)
             svPicker.Position = UDim2.new(0, 10, 0, 40)
             svPicker.Image = "rbxassetid://4155801252"
             svPicker.BackgroundColor3 = Color3.fromHSV(colorpicker.Hue, 1, 1)
+            svPicker.ZIndex = 2001
             svPicker.Parent = popup
 
             local cursor = Instance.new("Frame")
@@ -1081,6 +1116,7 @@ function Library:CreateWindow(title, gameName)
             cursor.AnchorPoint = Vector2.new(0.5, 0.5)
             cursor.BackgroundColor3 = Color3.new(1, 1, 1)
             cursor.Position = UDim2.fromScale(colorpicker.Sat, 1 - colorpicker.Val)
+            cursor.ZIndex = 2002
             cursor.Parent = svPicker
             Utils.Round(cursor, 2)
             Utils.Stroke(cursor, Color3.new(0, 0, 0), 1, 0)
@@ -1089,6 +1125,7 @@ function Library:CreateWindow(title, gameName)
             huePicker.Size = UDim2.new(0, 20, 0, 150)
             huePicker.Position = UDim2.new(0, 200, 0, 40)
             huePicker.Image = "rbxassetid://3641079629"
+            huePicker.ZIndex = 2001
             huePicker.Parent = popup
 
             local hCursor = Instance.new("Frame")
@@ -1680,8 +1717,23 @@ function Library:CreateWindow(title, gameName)
         return wm
     end
 
-    function Library:Notify(message, toastType, duration)
+    function Library:Notify(message, duration, toastType)
         ToastSystem.Create(screen, message, toastType, duration)
+    end
+
+    function Library:SetTweenSpeed(speed)
+        Configuration.Settings.TweenSpeed = speed
+    end
+
+    function Library:SetTweenStyle(style)
+        if typeof(style) == "string" then
+            style = Enum.EasingStyle[style]
+        end
+        Configuration.Settings.TweenStyle = style
+    end
+
+    function Library:SetDraggingSpeed(speed)
+        Configuration.Settings.DraggingSpeed = speed
     end
 
     return Window
