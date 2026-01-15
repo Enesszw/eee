@@ -212,6 +212,8 @@ function ToastSystem.Create(parent, message, toastType, duration, statusCode)
     ToastSystem.RepositionToasts()
 
     Utils.Tween(toast, {Size = UDim2.new(0, 320, 0, toastHeight)}, Configuration.Animations.Medium)
+    toast.Size = UDim2.new(0, 100, 0, toastHeight) -- Initial small size for pop effect
+    Utils.Tween(toast, {Size = UDim2.new(0, 320, 0, toastHeight)}, Configuration.Animations.Bounce)
 
     task.delay(duration or 3.5, function()
         if toast.Parent then
@@ -251,20 +253,28 @@ function Library:CreateWindow(title, gameName)
     main.Size = UDim2.new(0, 580, 0, 420)
     main.Position = UDim2.new(0.5, 0, 0.5, 0)
     main.AnchorPoint = Vector2.new(0.5, 0.5)
-    main.BackgroundColor3 = Configuration.Colors.Bg
-    main.BackgroundTransparency = 0.2
+    main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    main.BackgroundTransparency = 0.13
     main.ClipsDescendants = true
     main.Parent = screen
-    Utils.Round(main, 24)
+    Utils.Round(main, 33)
     Utils.Stroke(main, Color3.new(1, 1, 1), 1, 0.92)
 
     local glass = Instance.new("Frame")
     glass.Size = UDim2.fromScale(1, 1)
-    glass.BackgroundColor3 = Color3.new(1, 1, 1)
-    glass.BackgroundTransparency = 0.985
+    glass.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    glass.BackgroundTransparency = 0.87
     glass.ZIndex = 0
     glass.Parent = main
-    Utils.Round(glass, 24)
+    Utils.Round(glass, 33)
+
+    local blur = game:GetService("Lighting"):FindFirstChild("GlassBlur")
+    if not blur then
+        blur = Instance.new("BlurEffect")
+        blur.Name = "GlassBlur"
+        blur.Parent = game:GetService("Lighting")
+    end
+    blur.Size = 10
 
     -- Title Bar / Bar with Traffic Lights --
     local bar = Instance.new("Frame")
@@ -428,6 +438,24 @@ function Library:CreateWindow(title, gameName)
             tabPage.Visible = true
         end
 
+            -- Hover & Click Animations --
+            tabBtn.MouseEnter:Connect(function()
+                if Window.ActiveTab.Btn ~= tabBtn then
+                    Utils.Tween(tabBtn, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+                end
+            end)
+            tabBtn.MouseLeave:Connect(function()
+                if Window.ActiveTab.Btn ~= tabBtn then
+                    Utils.Tween(tabBtn, {BackgroundTransparency = 1}, Configuration.Animations.Fast)
+                end
+            end)
+            tabBtn.MouseButton1Down:Connect(function()
+                Utils.Tween(tabBtn, {Size = UDim2.new(1, -4, 0, 34)}, Configuration.Animations.VeryFast)
+            end)
+            tabBtn.MouseButton1Up:Connect(function()
+                Utils.Tween(tabBtn, {Size = UDim2.new(1, 0, 0, 36)}, Configuration.Animations.VeryFast)
+            end)
+
         tabBtn.MouseButton1Click:Connect(function()
             Tab:Select()
         end)
@@ -460,10 +488,10 @@ function Library:CreateWindow(title, gameName)
             button.BackgroundTransparency = 0.96
             button.Parent = tabPage
             Utils.Round(button, 14)
-            Utils.Stroke(button, Color3.new(1, 1, 1), 1, 0.95)
+            local stroke = Utils.Stroke(button, Color3.new(1, 1, 1), 1, 0.95)
 
             local btnText = Instance.new("TextLabel")
-            btnText.Size = UDim2.fromScale(1, 1)
+            btnText.Size = UDim2.new(1, 0, 1, 0)
             btnText.Position = UDim2.new(0, 14, 0, 0)
             btnText.Text = name
             btnText.TextColor3 = Configuration.Colors.TextMain
@@ -479,10 +507,21 @@ function Library:CreateWindow(title, gameName)
             interact.Text = ""
             interact.Parent = button
 
-            interact.MouseButton1Click:Connect(function()
-                Utils.Tween(button, {BackgroundTransparency = 0.9}, 0.1)
-                task.wait(0.1)
-                Utils.Tween(button, {BackgroundTransparency = 0.96}, 0.2)
+            -- Hover & Click Animations --
+            button.MouseEnter:Connect(function()
+                Utils.Tween(button, {BackgroundTransparency = 0.92}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.85}, Configuration.Animations.Fast)
+            end)
+            button.MouseLeave:Connect(function()
+                Utils.Tween(button, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.95}, Configuration.Animations.Fast)
+            end)
+
+            interact.MouseButton1Down:Connect(function()
+                Utils.Tween(button, {Size = UDim2.new(0, 356, 0, 42)}, Configuration.Animations.VeryFast)
+            end)
+            interact.MouseButton1Up:Connect(function()
+                Utils.Tween(button, {Size = UDim2.new(0, 360, 0, 48)}, Configuration.Animations.VeryFast)
                 callback()
             end)
             
@@ -533,6 +572,14 @@ function Library:CreateWindow(title, gameName)
             interact.Text = ""
             interact.Parent = frame
 
+            -- Hover & Click Animations --
+            frame.MouseEnter:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.92}, Configuration.Animations.Fast)
+            end)
+            frame.MouseLeave:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+            end)
+
             function toggle:Set(state)
                 toggle.State = state
                 Utils.Tween(toggleBg, {BackgroundColor3 = toggle.State and Configuration.Colors.Primary or Color3.fromRGB(40, 40, 40)}, 0.2)
@@ -540,7 +587,11 @@ function Library:CreateWindow(title, gameName)
                 callback(toggle.State)
             end
 
-            interact.MouseButton1Click:Connect(function()
+            interact.MouseButton1Down:Connect(function()
+                Utils.Tween(frame, {Size = UDim2.new(0, 356, 0, 42)}, Configuration.Animations.VeryFast)
+            end)
+            interact.MouseButton1Up:Connect(function()
+                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, 44)}, Configuration.Animations.VeryFast)
                 toggle:Set(not toggle.State)
             end)
 
@@ -556,7 +607,17 @@ function Library:CreateWindow(title, gameName)
             frame.BackgroundTransparency = 0.96
             frame.Parent = tabPage
             Utils.Round(frame, 14)
-            Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
+            local stroke = Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
+
+            -- Hover Animations --
+            frame.MouseEnter:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.92}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.85}, Configuration.Animations.Fast)
+            end)
+            frame.MouseLeave:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.95}, Configuration.Animations.Fast)
+            end)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.new(1, 0, 0, 24)
@@ -645,7 +706,17 @@ function Library:CreateWindow(title, gameName)
             frame.ClipsDescendants = true
             frame.Parent = tabPage
             Utils.Round(frame, 14)
-            Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
+            local stroke = Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
+
+            -- Hover Animations --
+            frame.MouseEnter:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.94}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.85}, Configuration.Animations.Fast)
+            end)
+            frame.MouseLeave:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.95}, Configuration.Animations.Fast)
+            end)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
@@ -750,20 +821,22 @@ function Library:CreateWindow(title, gameName)
             arrow.Parent = frame
 
             local container = Instance.new("Frame")
-            container.Size = UDim2.new(1, -10, 0, 0)
-            container.Position = UDim2.new(0, 5, 0, 44)
+            container.Size = UDim2.new(1, -20, 0, 0)
+            container.Position = UDim2.new(0, 10, 0, 44)
             container.BackgroundTransparency = 1
+            container.ClipsDescendants = true
             container.Parent = frame
 
             local clist = Instance.new("UIListLayout")
-            clist.Padding = UDim.new(0, 4)
+            clist.Padding = UDim.new(0, 6)
             clist.Parent = container
 
             local function toggle(state)
                 dropdown.Opened = state
-                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 10) or 44
+                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 14) or 44
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
-                Utils.Tween(arrow, {Rotation = state and 180 or 0}, 0.3)
+                Utils.Tween(arrow, {Rotation = state and 90 or 0}, 0.3)
+                Utils.Tween(container, {Size = UDim2.new(1, -20, 0, state and clist.AbsoluteContentSize.Y or 0)}, 0.3)
             end
 
             local interact = Instance.new("TextButton")
@@ -778,24 +851,25 @@ function Library:CreateWindow(title, gameName)
 
             for i, v in ipairs(list) do
                 local opt = Instance.new("TextButton")
-                opt.Size = UDim2.new(1, 0, 0, 32)
+                opt.Size = UDim2.new(1, 0, 0, 34)
                 opt.BackgroundColor3 = table.find(dropdown.Selected, v) and Configuration.Colors.Primary or Color3.new(1, 1, 1)
-                opt.BackgroundTransparency = table.find(dropdown.Selected, v) and 0.2 or 0.96
+                opt.BackgroundTransparency = table.find(dropdown.Selected, v) and 0.4 or 0.96
                 opt.Text = v
-                opt.TextColor3 = Configuration.Colors.TextSec
+                opt.TextColor3 = table.find(dropdown.Selected, v) and Configuration.Colors.TextMain or Configuration.Colors.TextSec
                 opt.TextSize = 13
-                opt.Font = Enum.Font.Gotham
+                opt.Font = Enum.Font.GothamMedium
                 opt.Parent = container
-                Utils.Round(opt, 8)
+                Utils.Round(opt, 10)
+                Utils.Stroke(opt, Color3.new(1, 1, 1), 1, 0.95)
 
                 opt.MouseButton1Click:Connect(function()
                     local idx = table.find(dropdown.Selected, v)
                     if idx then
                         table.remove(dropdown.Selected, idx)
-                        Utils.Tween(opt, {BackgroundTransparency = 0.96, BackgroundColor3 = Color3.new(1, 1, 1)}, 0.2)
+                        Utils.Tween(opt, {BackgroundTransparency = 0.96, BackgroundColor3 = Color3.new(1, 1, 1), TextColor3 = Configuration.Colors.TextSec}, 0.2)
                     else
                         table.insert(dropdown.Selected, v)
-                        Utils.Tween(opt, {BackgroundTransparency = 0.2, BackgroundColor3 = Configuration.Colors.Primary}, 0.2)
+                        Utils.Tween(opt, {BackgroundTransparency = 0.4, BackgroundColor3 = Configuration.Colors.Primary, TextColor3 = Configuration.Colors.TextMain}, 0.2)
                     end
                     text.Text = name .. " (" .. #dropdown.Selected .. ")"
                     callback(dropdown.Selected)
@@ -892,9 +966,14 @@ function Library:CreateWindow(title, gameName)
             Utils.Round(bindBtn, 8)
             Utils.Stroke(bindBtn, Color3.new(1, 1, 1), 1, 0.9)
 
-            bindBtn.MouseButton1Click:Connect(function()
-                bindBtn.Text = "..."
+            bindBtn.MouseButton1Down:Connect(function()
+                Utils.Tween(bindBtn, {Size = UDim2.new(0, 66, 0, 24)}, Configuration.Animations.VeryFast)
+            end)
+            bindBtn.MouseButton1Up:Connect(function()
+                Utils.Tween(bindBtn, {Size = UDim2.new(0, 70, 0, 26)}, Configuration.Animations.VeryFast)
+                if binding then return end
                 binding = true
+                bindBtn.Text = "..."
             end)
 
             UserInputService.InputBegan:Connect(function(input)
@@ -910,16 +989,24 @@ function Library:CreateWindow(title, gameName)
         end
 
         function Tab:CreateColorpicker(name, default, callback)
-            local colorpicker = {Color = default or Color3.fromRGB(255, 255, 255), Opened = false}
+            local colorpicker = {
+                Color = default or Color3.fromRGB(255, 255, 255),
+                Opened = false,
+                Hue = 0,
+                Sat = 0,
+                Val = 1
+            }
             
+            local h, s, v = colorpicker.Color:ToHSV()
+            colorpicker.Hue, colorpicker.Sat, colorpicker.Val = h, s, v
+
             local frame = Instance.new("Frame")
             frame.Size = UDim2.new(0, 360, 0, 48)
             frame.BackgroundColor3 = Color3.new(1, 1, 1)
             frame.BackgroundTransparency = 0.96
-            frame.ClipsDescendants = true
             frame.Parent = tabPage
             Utils.Round(frame, 14)
-            Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
+            local stroke = Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
@@ -941,78 +1028,184 @@ function Library:CreateWindow(title, gameName)
             Utils.Round(preview, 6)
             Utils.Stroke(preview, Color3.new(1, 1, 1), 1, 0.8)
 
-            local container = Instance.new("Frame")
-            container.Size = UDim2.new(1, -20, 0, 100)
-            container.Position = UDim2.new(0, 10, 0, 48)
-            container.BackgroundTransparency = 1
-            container.Parent = frame
+            local popup = Instance.new("Frame")
+            popup.Size = UDim2.new(0, 240, 0, 250)
+            popup.Position = UDim2.new(0.5, 0, 0.5, 0)
+            popup.AnchorPoint = Vector2.new(0.5, 0.5)
+            popup.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+            popup.BorderSizePixel = 0
+            popup.Visible = false
+            popup.ZIndex = 2000
+            popup.Parent = screen
+            Utils.Round(popup, 12)
+            Utils.Stroke(popup, Color3.new(1, 1, 1), 1, 0.1)
 
-            local function createSlider(prop, color)
-                local sframe = Instance.new("Frame")
-                sframe.Size = UDim2.new(1, 0, 0, 30)
-                sframe.BackgroundTransparency = 1
-                sframe.Parent = container
+            local pTitle = Instance.new("Frame")
+            pTitle.Size = UDim2.new(1, 0, 0, 30)
+            pTitle.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            pTitle.BorderSizePixel = 0
+            pTitle.Parent = popup
+            Utils.Round(pTitle, 12)
 
-                local track = Instance.new("Frame")
-                track.Size = UDim2.new(1, -20, 0, 4)
-                track.Position = UDim2.new(0, 10, 0.5, 0)
-                track.AnchorPoint = Vector2.new(0, 0.5)
-                track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                track.Parent = sframe
-                Utils.Round(track, 2)
+            local pText = Instance.new("TextLabel")
+            pText.Size = UDim2.new(1, -20, 1, 0)
+            pText.Position = UDim2.new(0, 10, 0, 0)
+            pText.Text = "Color Picker"
+            pText.TextColor3 = Color3.new(1, 1, 1)
+            pText.TextSize = 12
+            pText.Font = Enum.Font.GothamBold
+            pText.TextXAlignment = Enum.TextXAlignment.Left
+            pText.BackgroundTransparency = 1
+            pText.Parent = pTitle
 
-                local fill = Instance.new("Frame")
-                fill.Size = UDim2.fromScale(colorpicker.Color[prop], 1)
-                fill.BackgroundColor3 = color
-                fill.Parent = track
-                Utils.Round(fill, 2)
+            local close = Instance.new("TextButton")
+            close.Size = UDim2.new(0, 30, 0, 30)
+            close.Position = UDim2.new(1, 0, 0, 0)
+            close.AnchorPoint = Vector2.new(1, 0)
+            close.BackgroundTransparency = 1
+            close.Text = "×"
+            close.TextColor3 = Color3.new(1, 1, 1)
+            close.TextSize = 20
+            close.Parent = pTitle
+            close.MouseButton1Click:Connect(function() popup.Visible = false end)
 
-                local interact = Instance.new("TextButton")
-                interact.Size = UDim2.fromScale(1, 1)
-                interact.BackgroundTransparency = 1
-                interact.Text = ""
-                interact.Parent = sframe
+            local svPicker = Instance.new("ImageLabel")
+            svPicker.Size = UDim2.new(0, 180, 0, 150)
+            svPicker.Position = UDim2.new(0, 10, 0, 40)
+            svPicker.Image = "rbxassetid://4155801252"
+            svPicker.BackgroundColor3 = Color3.fromHSV(colorpicker.Hue, 1, 1)
+            svPicker.Parent = popup
 
-                local dragging = false
-                local function update()
-                    local pos = math.clamp((UserInputService:GetMouseLocation().X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-                    fill.Size = UDim2.fromScale(pos, 1)
-                    local r = prop == "R" and pos or colorpicker.Color.R
-                    local g = prop == "G" and pos or colorpicker.Color.G
-                    local b = prop == "B" and pos or colorpicker.Color.B
-                    colorpicker.Color = Color3.new(r, g, b)
-                    preview.BackgroundColor3 = colorpicker.Color
-                    callback(colorpicker.Color)
-                end
+            local cursor = Instance.new("Frame")
+            cursor.Size = UDim2.new(0, 4, 0, 4)
+            cursor.AnchorPoint = Vector2.new(0.5, 0.5)
+            cursor.BackgroundColor3 = Color3.new(1, 1, 1)
+            cursor.Position = UDim2.fromScale(colorpicker.Sat, 1 - colorpicker.Val)
+            cursor.Parent = svPicker
+            Utils.Round(cursor, 2)
+            Utils.Stroke(cursor, Color3.new(0, 0, 0), 1, 0)
 
-                interact.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true update() end
-                end)
-                UserInputService.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-                end)
-                UserInputService.InputChanged:Connect(function(input)
-                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then update() end
-                end)
+            local huePicker = Instance.new("ImageLabel")
+            huePicker.Size = UDim2.new(0, 20, 0, 150)
+            huePicker.Position = UDim2.new(0, 200, 0, 40)
+            huePicker.Image = "rbxassetid://3641079629"
+            huePicker.Parent = popup
+
+            local hCursor = Instance.new("Frame")
+            hCursor.Size = UDim2.new(1, 0, 0, 2)
+            hCursor.BackgroundColor3 = Color3.new(1, 1, 1)
+            hCursor.Position = UDim2.fromScale(0, 1 - colorpicker.Hue)
+            hCursor.Parent = huePicker
+
+            local rgbText = Instance.new("TextBox")
+            rgbText.Size = UDim2.new(1, -20, 0, 20)
+            rgbText.Position = UDim2.new(0, 10, 0, 200)
+            rgbText.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            rgbText.TextColor3 = Color3.new(1, 1, 1)
+            rgbText.TextSize = 11
+            rgbText.Font = Enum.Font.Gotham
+            rgbText.Text = string.format("%d, %d, %d", colorpicker.Color.R*255, colorpicker.Color.G*255, colorpicker.Color.B*255)
+            rgbText.Parent = popup
+            Utils.Round(rgbText, 4)
+
+            local hexText = Instance.new("TextBox")
+            hexText.Size = UDim2.new(1, -20, 0, 20)
+            hexText.Position = UDim2.new(0, 10, 0, 225)
+            hexText.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            hexText.TextColor3 = Color3.new(1, 1, 1)
+            hexText.TextSize = 11
+            hexText.Font = Enum.Font.Gotham
+            hexText.Text = "#" .. colorpicker.Color:ToHex():upper()
+            hexText.Parent = popup
+            Utils.Round(hexText, 4)
+
+            local function update()
+                colorpicker.Color = Color3.fromHSV(colorpicker.Hue, colorpicker.Sat, colorpicker.Val)
+                preview.BackgroundColor3 = colorpicker.Color
+                svPicker.BackgroundColor3 = Color3.fromHSV(colorpicker.Hue, 1, 1)
+                cursor.Position = UDim2.fromScale(colorpicker.Sat, 1 - colorpicker.Val)
+                hCursor.Position = UDim2.fromScale(0, 1 - colorpicker.Hue)
+                rgbText.Text = string.format("%d, %d, %d", colorpicker.Color.R*255, colorpicker.Color.G*255, colorpicker.Color.B*255)
+                hexText.Text = "#" .. colorpicker.Color:ToHex():upper()
+                callback(colorpicker.Color)
             end
 
-            createSlider("R", Color3.fromRGB(255, 80, 80))
-            createSlider("G", Color3.fromRGB(80, 255, 80))
-            createSlider("B", Color3.fromRGB(80, 80, 255))
-            
-            local clist = Instance.new("UIListLayout")
-            clist.Padding = UDim.new(0, 2)
-            clist.Parent = container
+            local draggingSV = false
+            svPicker.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSV = true end
+            end)
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSV = false end
+            end)
+            UserInputService.InputChanged:Connect(function(input)
+                if draggingSV and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local relativeX = math.clamp((input.Position.X - svPicker.AbsolutePosition.X) / svPicker.AbsoluteSize.X, 0, 1)
+                    local relativeY = math.clamp((input.Position.Y - svPicker.AbsolutePosition.Y) / svPicker.AbsoluteSize.Y, 0, 1)
+                    colorpicker.Sat = relativeX
+                    colorpicker.Val = 1 - relativeY
+                    update()
+                end
+            end)
+
+            local draggingH = false
+            huePicker.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingH = true end
+            end)
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingH = false end
+            end)
+            UserInputService.InputChanged:Connect(function(input)
+                if draggingH and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local relativeY = math.clamp((input.Position.Y - huePicker.AbsolutePosition.Y) / huePicker.AbsoluteSize.Y, 0, 1)
+                    colorpicker.Hue = 1 - relativeY
+                    update()
+                end
+            end)
+
+            -- Dragging for Popup --
+            local dragP, dStart, sPos
+            pTitle.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragP = true
+                    dStart = input.Position
+                    sPos = popup.Position
+                end
+            end)
+            UserInputService.InputChanged:Connect(function(input)
+                if dragP and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local delta = input.Position - dStart
+                    popup.Position = UDim2.new(sPos.X.Scale, sPos.X.Offset + delta.X, sPos.Y.Scale, sPos.Y.Offset + delta.Y)
+                end
+            end)
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then dragP = false end
+            end)
 
             local interact = Instance.new("TextButton")
-            interact.Size = UDim2.new(1, 0, 0, 48)
+            interact.Size = UDim2.fromScale(1, 1)
             interact.BackgroundTransparency = 1
             interact.Text = ""
             interact.Parent = frame
 
-            interact.MouseButton1Click:Connect(function()
-                colorpicker.Opened = not colorpicker.Opened
-                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, colorpicker.Opened and 155 or 48)}, 0.3)
+            -- Hover & Click Animations --
+            frame.MouseEnter:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.92}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.85}, Configuration.Animations.Fast)
+            end)
+            frame.MouseLeave:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+                Utils.Tween(stroke, {Transparency = 0.95}, Configuration.Animations.Fast)
+            end)
+
+            interact.MouseButton1Down:Connect(function()
+                Utils.Tween(frame, {Size = UDim2.new(0, 356, 0, 42)}, Configuration.Animations.VeryFast)
+            end)
+            interact.MouseButton1Up:Connect(function()
+                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, 48)}, Configuration.Animations.VeryFast)
+                popup.Visible = not popup.Visible
+                if popup.Visible then
+                    popup.Position = UDim2.new(0, UserInputService:GetMouseLocation().X + 130, 0, UserInputService:GetMouseLocation().Y)
+                end
             end)
 
             return colorpicker
@@ -1118,12 +1311,26 @@ function Library:CreateWindow(title, gameName)
             box.BackgroundTransparency = 1
             box.Parent = frame
 
+            -- Hover Animations --
+            frame.MouseEnter:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.94}, Configuration.Animations.Fast)
+                if not box:IsFocused() then
+                    Utils.Tween(stroke, {Transparency = 0.85}, Configuration.Animations.Fast)
+                end
+            end)
+            frame.MouseLeave:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+                if not box:IsFocused() then
+                    Utils.Tween(stroke, {Transparency = 0.95}, Configuration.Animations.Fast)
+                end
+            end)
+
             box.Focused:Connect(function()
-                Utils.Tween(stroke, {Transparency = 0.5, Thickness = 1.2}, 0.3)
+                Utils.Tween(stroke, {Transparency = 0.5, Thickness = 1.2, Color = Configuration.Colors.Primary}, 0.3)
             end)
 
             box.FocusLost:Connect(function()
-                Utils.Tween(stroke, {Transparency = 0.95, Thickness = 1}, 0.3)
+                Utils.Tween(stroke, {Transparency = 0.95, Thickness = 1, Color = Color3.new(1,1,1)}, 0.3)
             end)
 
             box:GetPropertyChangedSignal("Text"):Connect(function()
@@ -1223,20 +1430,32 @@ function Library:CreateWindow(title, gameName)
             clist.Padding = UDim.new(0, 4)
             clist.Parent = container
 
-            local function toggle(state)
-                collapsible.Opened = state
-                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 10) or 44
-                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
-                Utils.Tween(arrow, {Rotation = state and 180 or 0}, 0.3)
-            end
-
             local interact = Instance.new("TextButton")
             interact.Size = UDim2.new(1, 0, 0, 44)
             interact.BackgroundTransparency = 1
             interact.Text = ""
             interact.Parent = frame
 
-            interact.MouseButton1Click:Connect(function()
+            local function toggle(state)
+                collapsible.Opened = state
+                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 14) or 44
+                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
+                Utils.Tween(arrow, {Rotation = state and 90 or 0}, 0.3)
+                Utils.Tween(container, {Size = UDim2.new(1, -20, 0, state and clist.AbsoluteContentSize.Y or 0)}, 0.3)
+            end
+
+            -- Hover & Click Animations --
+            frame.MouseEnter:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.94}, Configuration.Animations.Fast)
+            end)
+            frame.MouseLeave:Connect(function()
+                Utils.Tween(frame, {BackgroundTransparency = 0.96}, Configuration.Animations.Fast)
+            end)
+
+            interact.MouseButton1Down:Connect(function()
+                Utils.Tween(frame, {Size = UDim2.new(0, 356, 0, frame.Size.Y.Offset - 2)}, Configuration.Animations.VeryFast)
+            end)
+            interact.MouseButton1Up:Connect(function()
                 toggle(not collapsible.Opened)
             end)
 
