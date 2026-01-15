@@ -245,70 +245,91 @@ function Library:CreateWindow(title, gameName)
     screen.Parent = game:GetService("CoreGui")
 
     local main = Instance.new("Frame")
-    main.Size = UDim2.new(0, 550, 0, 380)
+    main.Size = UDim2.new(0, 580, 0, 420)
     main.Position = UDim2.new(0.5, 0, 0.5, 0)
     main.AnchorPoint = Vector2.new(0.5, 0.5)
     main.BackgroundColor3 = Configuration.Colors.Bg
-    main.BackgroundTransparency = 0.1
+    main.BackgroundTransparency = 0.2
+    main.ClipsDescendants = true
     main.Parent = screen
-    Utils.Round(main, 16)
-    Utils.Stroke(main, Color3.new(1, 1, 1), 1, 0.94)
+    Utils.Round(main, 24)
+    Utils.Stroke(main, Color3.new(1, 1, 1), 1, 0.92)
+
+    local glass = Instance.new("Frame")
+    glass.Size = UDim2.fromScale(1, 1)
+    glass.BackgroundColor3 = Color3.new(1, 1, 1)
+    glass.BackgroundTransparency = 0.985
+    glass.ZIndex = 0
+    glass.Parent = main
+    Utils.Round(glass, 24)
+
+    -- Title Bar / Bar with Traffic Lights --
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.new(1, 0, 0, 44)
+    bar.BackgroundTransparency = 1
+    bar.Parent = main
+    
+    local dots = Instance.new("Frame")
+    dots.Size = UDim2.new(0, 54, 0, 12)
+    dots.Position = UDim2.new(0, 20, 0.5, 0)
+    dots.AnchorPoint = Vector2.new(0, 0.5)
+    dots.BackgroundTransparency = 1
+    dots.Parent = bar
+
+    local dColors = {
+        Configuration.Colors.TrafficRed,
+        Configuration.Colors.TrafficYellow,
+        Configuration.Colors.TrafficGreen
+    }
+    for i, c in ipairs(dColors) do
+        local d = Instance.new("Frame")
+        d.Size = UDim2.fromOffset(10, 10)
+        d.Position = UDim2.fromOffset((i - 1) * 16, 0)
+        d.BackgroundColor3 = c
+        d.BorderSizePixel = 0
+        d.Parent = dots
+        Utils.Round(d, 5)
+    end
+
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1, 0, 1, 0)
+    titleText.Text = Window.WindowName:upper()
+    titleText.TextColor3 = Color3.new(1, 1, 1)
+    titleText.TextTransparency = 0.7
+    titleText.TextSize = 9
+    titleText.Font = Enum.Font.GothamBold
+    titleText.BackgroundTransparency = 1
+    titleText.Parent = bar
 
     -- Sidebar --
     local sidebar = Instance.new("Frame")
-    sidebar.Size = UDim2.new(0, 160, 1, 0)
+    sidebar.Size = UDim2.new(0, 170, 1, -44)
+    sidebar.Position = UDim2.new(0, 0, 0, 44)
     sidebar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    sidebar.BackgroundTransparency = 0.2
+    sidebar.BackgroundTransparency = 0.4
     sidebar.Parent = main
-    Utils.Round(sidebar, 16) -- Will be clipped by main corner
+    Utils.Round(sidebar, 24)
     
     local sidebarPad = Instance.new("UIPadding")
-    sidebarPad.PaddingTop = UDim.new(0, 15)
-    sidebarPad.PaddingLeft = UDim.new(0, 10)
-    sidebarPad.PaddingRight = UDim.new(0, 10)
+    sidebarPad.PaddingTop = UDim.new(0, 10)
+    sidebarPad.PaddingLeft = UDim.new(0, 15)
+    sidebarPad.PaddingRight = UDim.new(0, 15)
     sidebarPad.Parent = sidebar
 
-    local titleGroup = Instance.new("Frame")
-    titleGroup.Size = UDim2.new(1, 0, 0, 40)
-    titleGroup.BackgroundTransparency = 1
-    titleGroup.Parent = sidebar
-
-    local mainTitle = Instance.new("TextLabel")
-    mainTitle.Size = UDim2.new(1, 0, 0, 20)
-    mainTitle.Text = Window.WindowName
-    mainTitle.TextColor3 = Configuration.Colors.TextMain
-    mainTitle.TextSize = 18
-    mainTitle.Font = Enum.Font.GothamBold
-    mainTitle.TextXAlignment = Enum.TextXAlignment.Left
-    mainTitle.BackgroundTransparency = 1
-    mainTitle.Parent = titleGroup
-
-    local subTitle = Instance.new("TextLabel")
-    subTitle.Size = UDim2.new(1, 0, 0, 14)
-    subTitle.Position = UDim2.new(0, 0, 0, 20)
-    subTitle.Text = Window.GameName
-    subTitle.TextColor3 = Configuration.Colors.TextSec
-    subTitle.TextSize = 11
-    subTitle.Font = Enum.Font.Gotham
-    subTitle.TextXAlignment = Enum.TextXAlignment.Left
-    subTitle.BackgroundTransparency = 1
-    subTitle.Parent = titleGroup
-
     local tabContainer = Instance.new("ScrollingFrame")
-    tabContainer.Size = UDim2.new(1, 0, 1, -60)
-    tabContainer.Position = UDim2.new(0, 0, 0, 50)
+    tabContainer.Size = UDim2.new(1, 0, 1, -10)
     tabContainer.BackgroundTransparency = 1
     tabContainer.ScrollBarThickness = 0
     tabContainer.Parent = sidebar
     
     local tabList = Instance.new("UIListLayout")
-    tabList.Padding = UDim.new(0, 5)
+    tabList.Padding = UDim.new(0, 6)
     tabList.Parent = tabContainer
 
     -- Content Area --
     local contentArea = Instance.new("Frame")
-    contentArea.Size = UDim2.new(1, -160, 1, 0)
-    contentArea.Position = UDim2.new(0, 160, 0, 0)
+    contentArea.Size = UDim2.new(1, -170, 1, -44)
+    contentArea.Position = UDim2.new(0, 170, 0, 44)
     contentArea.BackgroundTransparency = 1
     contentArea.Parent = main
 
@@ -317,9 +338,9 @@ function Library:CreateWindow(title, gameName)
     tabPages.BackgroundTransparency = 1
     tabPages.Parent = contentArea
 
-    -- Dragging Logic --
+    -- Dragging Logic (Targeting 'bar') --
     local dragging, dragStart, startPos
-    main.InputBegan:Connect(function(input)
+    bar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
@@ -341,17 +362,17 @@ function Library:CreateWindow(title, gameName)
         local Tab = {Visible = false}
         
         local tabBtn = Instance.new("TextButton")
-        tabBtn.Size = UDim2.new(1, 0, 0, 32)
-        tabBtn.BackgroundColor3 = Configuration.Colors.Primary
+        tabBtn.Size = UDim2.new(1, 0, 0, 36)
+        tabBtn.BackgroundColor3 = Color3.new(1, 1, 1)
         tabBtn.BackgroundTransparency = 1
         tabBtn.Text = ""
         tabBtn.AutoButtonColor = false
         tabBtn.Parent = tabContainer
-        Utils.Round(tabBtn, 8)
+        Utils.Round(tabBtn, 12)
 
         local tabIcon = Instance.new("ImageLabel")
         tabIcon.Size = UDim2.fromOffset(18, 18)
-        tabIcon.Position = UDim2.new(0, 8, 0.5, 0)
+        tabIcon.Position = UDim2.new(0, 10, 0.5, 0)
         tabIcon.AnchorPoint = Vector2.new(0, 0.5)
         tabIcon.Image = icon or Icons.Circle
         tabIcon.ImageColor3 = Configuration.Colors.TextSec
@@ -359,8 +380,8 @@ function Library:CreateWindow(title, gameName)
         tabIcon.Parent = tabBtn
 
         local tabTitle = Instance.new("TextLabel")
-        tabTitle.Size = UDim2.new(1, -34, 1, 0)
-        tabTitle.Position = UDim2.new(0, 32, 0, 0)
+        tabTitle.Size = UDim2.new(1, -38, 1, 0)
+        tabTitle.Position = UDim2.new(0, 38, 0, 0)
         tabTitle.Text = name
         tabTitle.TextColor3 = Configuration.Colors.TextSec
         tabTitle.TextSize = 13
@@ -373,19 +394,17 @@ function Library:CreateWindow(title, gameName)
         tabPage.Size = UDim2.fromScale(1, 1)
         tabPage.BackgroundTransparency = 1
         tabPage.Visible = false
-        tabPage.ScrollBarThickness = 2
-        tabPage.ScrollBarImageColor3 = Configuration.Colors.Primary
+        tabPage.ScrollBarThickness = 0
         tabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
         tabPage.Parent = tabPages
 
         local pageList = Instance.new("UIListLayout")
-        pageList.Padding = UDim.new(0, 8)
+        pageList.Padding = UDim.new(0, 12)
         pageList.HorizontalAlignment = Enum.HorizontalAlignment.Center
         pageList.Parent = tabPage
         
         local pagePad = Instance.new("UIPadding")
-        pagePad.PaddingTop = UDim.new(0, 15)
-        pagePad.PaddingBottom = UDim.new(0, 15)
+        pagePad.PaddingTop = UDim.new(0, 5)
         pagePad.Parent = tabPage
 
         pageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -394,15 +413,15 @@ function Library:CreateWindow(title, gameName)
 
         function Tab:Select()
             if Window.ActiveTab then
-                Window.ActiveTab.Btn.BackgroundTransparency = 1
-                Window.ActiveTab.Icon.ImageColor3 = Configuration.Colors.TextSec
-                Window.ActiveTab.Title.TextColor3 = Configuration.Colors.TextSec
+                Utils.Tween(Window.ActiveTab.Btn, {BackgroundTransparency = 1}, 0.2)
+                Utils.Tween(Window.ActiveTab.Icon, {ImageColor3 = Configuration.Colors.TextSec}, 0.2)
+                Utils.Tween(Window.ActiveTab.Title, {TextColor3 = Configuration.Colors.TextSec}, 0.2)
                 Window.ActiveTab.Page.Visible = false
             end
             Window.ActiveTab = {Btn = tabBtn, Icon = tabIcon, Title = tabTitle, Page = tabPage}
-            tabBtn.BackgroundTransparency = 0.9
-            tabIcon.ImageColor3 = Configuration.Colors.Primary
-            tabTitle.TextColor3 = Configuration.Colors.TextMain
+            Utils.Tween(tabBtn, {BackgroundTransparency = 0.94}, 0.2)
+            Utils.Tween(tabIcon, {ImageColor3 = Configuration.Colors.Primary}, 0.2)
+            Utils.Tween(tabTitle, {TextColor3 = Configuration.Colors.TextMain}, 0.2)
             tabPage.Visible = true
         end
 
@@ -429,31 +448,23 @@ function Library:CreateWindow(title, gameName)
             sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
             sectionLabel.BackgroundTransparency = 1
             sectionLabel.Parent = section
-            
-            local line = Instance.new("Frame")
-            line.Size = UDim2.new(1, -sectionLabel.TextBounds.X - 10, 0, 1)
-            line.Position = UDim2.new(0, sectionLabel.TextBounds.X + 10, 0.5, 0)
-            line.BackgroundColor3 = Configuration.Colors.TextMuted
-            line.BackgroundTransparency = 0.8
-            line.BorderSizePixel = 0
-            line.Parent = section
         end
 
         function Tab:CreateButton(name, callback)
             local button = Instance.new("Frame")
-            button.Size = UDim2.new(0, 360, 0, 38)
-            button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            button.BackgroundTransparency = 0.5
+            button.Size = UDim2.new(0, 360, 0, 48)
+            button.BackgroundColor3 = Color3.new(1, 1, 1)
+            button.BackgroundTransparency = 0.96
             button.Parent = tabPage
-            Utils.Round(button, 10)
+            Utils.Round(button, 14)
             Utils.Stroke(button, Color3.new(1, 1, 1), 1, 0.95)
 
             local btnText = Instance.new("TextLabel")
             btnText.Size = UDim2.fromScale(1, 1)
-            btnText.Position = UDim2.new(0, 12, 0, 0)
+            btnText.Position = UDim2.new(0, 14, 0, 0)
             btnText.Text = name
             btnText.TextColor3 = Configuration.Colors.TextMain
-            btnText.TextSize = 13
+            btnText.TextSize = 14
             btnText.Font = Enum.Font.GothamMedium
             btnText.TextXAlignment = Enum.TextXAlignment.Left
             btnText.BackgroundTransparency = 1
@@ -466,50 +477,52 @@ function Library:CreateWindow(title, gameName)
             interact.Parent = button
 
             interact.MouseButton1Click:Connect(function()
-                Utils.Tween(button, {BackgroundColor3 = Configuration.Colors.Primary}, 0.1)
+                Utils.Tween(button, {BackgroundTransparency = 0.9}, 0.1)
                 task.wait(0.1)
-                Utils.Tween(button, {BackgroundColor3 = Color3.fromRGB(20, 20, 20)}, 0.2)
+                Utils.Tween(button, {BackgroundTransparency = 0.96}, 0.2)
                 callback()
             end)
+            
+            return {Frame = button}
         end
 
         function Tab:CreateToggle(name, default, callback)
             local toggle = {State = default or false}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 48)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
             local toggleBg = Instance.new("Frame")
-            toggleBg.Size = UDim2.new(0, 32, 0, 18)
-            toggleBg.Position = UDim2.new(1, -44, 0.5, 0)
+            toggleBg.Size = UDim2.new(0, 36, 0, 20)
+            toggleBg.Position = UDim2.new(1, -50, 0.5, 0)
             toggleBg.AnchorPoint = Vector2.new(0, 0.5)
             toggleBg.BackgroundColor3 = toggle.State and Configuration.Colors.Primary or Color3.fromRGB(40, 40, 40)
             toggleBg.Parent = frame
-            Utils.Round(toggleBg, 9)
+            Utils.Round(toggleBg, 10)
 
             local dot = Instance.new("Frame")
-            dot.Size = UDim2.new(0, 12, 0, 12)
-            dot.Position = UDim2.new(0, toggle.State and 16 or 3, 0.5, 0)
+            dot.Size = UDim2.new(0, 14, 0, 14)
+            dot.Position = UDim2.new(0, toggle.State and 19 or 3, 0.5, 0)
             dot.AnchorPoint = Vector2.new(0, 0.5)
             dot.BackgroundColor3 = Color3.new(1, 1, 1)
             dot.Parent = toggleBg
-            Utils.Round(dot, 6)
+            Utils.Round(dot, 7)
 
             local interact = Instance.new("TextButton")
             interact.Size = UDim2.fromScale(1, 1)
@@ -520,7 +533,7 @@ function Library:CreateWindow(title, gameName)
             function toggle:Set(state)
                 toggle.State = state
                 Utils.Tween(toggleBg, {BackgroundColor3 = toggle.State and Configuration.Colors.Primary or Color3.fromRGB(40, 40, 40)}, 0.2)
-                Utils.Tween(dot, {Position = UDim2.new(0, toggle.State and 16 or 3, 0.5, 0)}, 0.2)
+                Utils.Tween(dot, {Position = UDim2.new(0, toggle.State and 19 or 3, 0.5, 0)}, 0.2)
                 callback(toggle.State)
             end
 
@@ -535,50 +548,50 @@ function Library:CreateWindow(title, gameName)
             local slider = {Value = default or min}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 50)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 60)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
-            text.Size = UDim2.new(1, 0, 0, 20)
-            text.Position = UDim2.new(0, 12, 0, 8)
+            text.Size = UDim2.new(1, 0, 0, 24)
+            text.Position = UDim2.new(0, 14, 0, 10)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
             local valText = Instance.new("TextLabel")
-            valText.Size = UDim2.new(0, 40, 0, 20)
-            valText.Position = UDim2.new(1, -52, 0, 8)
+            valText.Size = UDim2.new(0, 50, 0, 24)
+            valText.Position = UDim2.new(1, -64, 0, 10)
             valText.Text = tostring(slider.Value)
             valText.TextColor3 = Configuration.Colors.Primary
-            valText.TextSize = 12
+            valText.TextSize = 13
             valText.Font = Enum.Font.GothamBold
             valText.TextXAlignment = Enum.TextXAlignment.Right
             valText.BackgroundTransparency = 1
             valText.Parent = frame
 
             local track = Instance.new("Frame")
-            track.Size = UDim2.new(1, -24, 0, 4)
-            track.Position = UDim2.new(0, 12, 1, -12)
+            track.Size = UDim2.new(1, -28, 0, 4)
+            track.Position = UDim2.new(0, 14, 1, -15)
             track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            track.BorderSizePixel = 0
             track.Parent = frame
             Utils.Round(track, 2)
 
             local fill = Instance.new("Frame")
             fill.Size = UDim2.fromScale((slider.Value - min) / (max - min), 1)
             fill.BackgroundColor3 = Configuration.Colors.Primary
-            fill.BorderSizePixel = 0
             fill.Parent = track
             Utils.Round(fill, 2)
-
+            
+            local _grad = Utils.CreateGradient(fill, Configuration.Colors.Primary, Configuration.Colors.PrimaryDark, 0)
+            
             local handle = Instance.new("Frame")
             handle.Size = UDim2.new(0, 12, 0, 12)
             handle.Position = UDim2.new((slider.Value - min) / (max - min), 0, 0.5, 0)
@@ -623,20 +636,20 @@ function Library:CreateWindow(title, gameName)
             local dropdown = {Options = list, Selected = default, Opened = false}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 44)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.ClipsDescendants = true
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name .. (dropdown.Selected and (": " .. dropdown.Selected) or "")
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
@@ -644,7 +657,7 @@ function Library:CreateWindow(title, gameName)
 
             local arrow = Instance.new("ImageLabel")
             arrow.Size = UDim2.fromOffset(16, 16)
-            arrow.Position = UDim2.new(1, -28, 0.5, 0)
+            arrow.Position = UDim2.new(1, -30, 0.5, 0)
             arrow.AnchorPoint = Vector2.new(0, 0.5)
             arrow.Image = "rbxassetid://10709791437"
             arrow.ImageColor3 = Configuration.Colors.TextMuted
@@ -653,7 +666,7 @@ function Library:CreateWindow(title, gameName)
 
             local container = Instance.new("Frame")
             container.Size = UDim2.new(1, -10, 0, 0)
-            container.Position = UDim2.new(0, 5, 0, 38)
+            container.Position = UDim2.new(0, 5, 0, 44)
             container.BackgroundTransparency = 1
             container.Parent = frame
 
@@ -663,13 +676,13 @@ function Library:CreateWindow(title, gameName)
 
             local function toggle(state)
                 dropdown.Opened = state
-                local targetSize = state and (38 + clist.AbsoluteContentSize.Y + 10) or 38
+                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 10) or 44
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
                 Utils.Tween(arrow, {Rotation = state and 180 or 0}, 0.3)
             end
 
             local interact = Instance.new("TextButton")
-            interact.Size = UDim2.new(1, 0, 0, 38)
+            interact.Size = UDim2.new(1, 0, 0, 44)
             interact.BackgroundTransparency = 1
             interact.Text = ""
             interact.Parent = frame
@@ -680,15 +693,15 @@ function Library:CreateWindow(title, gameName)
 
             for i, v in ipairs(list) do
                 local opt = Instance.new("TextButton")
-                opt.Size = UDim2.new(1, 0, 0, 28)
-                opt.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                opt.BackgroundTransparency = 0.5
+                opt.Size = UDim2.new(1, 0, 0, 32)
+                opt.BackgroundColor3 = Color3.new(1, 1, 1)
+                opt.BackgroundTransparency = 0.96
                 opt.Text = v
                 opt.TextColor3 = Configuration.Colors.TextSec
-                opt.TextSize = 12
+                opt.TextSize = 13
                 opt.Font = Enum.Font.Gotham
                 opt.Parent = container
-                Utils.Round(opt, 6)
+                Utils.Round(opt, 8)
 
                 opt.MouseButton1Click:Connect(function()
                     dropdown.Selected = v
@@ -705,20 +718,20 @@ function Library:CreateWindow(title, gameName)
             local dropdown = {Options = list, Selected = default or {}, Opened = false}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 44)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.ClipsDescendants = true
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name .. " (" .. #dropdown.Selected .. ")"
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
@@ -726,7 +739,7 @@ function Library:CreateWindow(title, gameName)
 
             local arrow = Instance.new("ImageLabel")
             arrow.Size = UDim2.fromOffset(16, 16)
-            arrow.Position = UDim2.new(1, -28, 0.5, 0)
+            arrow.Position = UDim2.new(1, -30, 0.5, 0)
             arrow.AnchorPoint = Vector2.new(0, 0.5)
             arrow.Image = "rbxassetid://10709791437"
             arrow.ImageColor3 = Configuration.Colors.TextMuted
@@ -735,7 +748,7 @@ function Library:CreateWindow(title, gameName)
 
             local container = Instance.new("Frame")
             container.Size = UDim2.new(1, -10, 0, 0)
-            container.Position = UDim2.new(0, 5, 0, 38)
+            container.Position = UDim2.new(0, 5, 0, 44)
             container.BackgroundTransparency = 1
             container.Parent = frame
 
@@ -745,13 +758,13 @@ function Library:CreateWindow(title, gameName)
 
             local function toggle(state)
                 dropdown.Opened = state
-                local targetSize = state and (38 + clist.AbsoluteContentSize.Y + 10) or 38
+                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 10) or 44
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
                 Utils.Tween(arrow, {Rotation = state and 180 or 0}, 0.3)
             end
 
             local interact = Instance.new("TextButton")
-            interact.Size = UDim2.new(1, 0, 0, 38)
+            interact.Size = UDim2.new(1, 0, 0, 44)
             interact.BackgroundTransparency = 1
             interact.Text = ""
             interact.Parent = frame
@@ -762,24 +775,24 @@ function Library:CreateWindow(title, gameName)
 
             for i, v in ipairs(list) do
                 local opt = Instance.new("TextButton")
-                opt.Size = UDim2.new(1, 0, 0, 28)
-                opt.BackgroundColor3 = table.find(dropdown.Selected, v) and Configuration.Colors.Primary or Color3.fromRGB(30, 30, 30)
-                opt.BackgroundTransparency = 0.5
+                opt.Size = UDim2.new(1, 0, 0, 32)
+                opt.BackgroundColor3 = table.find(dropdown.Selected, v) and Configuration.Colors.Primary or Color3.new(1, 1, 1)
+                opt.BackgroundTransparency = table.find(dropdown.Selected, v) and 0.2 or 0.96
                 opt.Text = v
                 opt.TextColor3 = Configuration.Colors.TextSec
-                opt.TextSize = 12
+                opt.TextSize = 13
                 opt.Font = Enum.Font.Gotham
                 opt.Parent = container
-                Utils.Round(opt, 6)
+                Utils.Round(opt, 8)
 
                 opt.MouseButton1Click:Connect(function()
                     local idx = table.find(dropdown.Selected, v)
                     if idx then
                         table.remove(dropdown.Selected, idx)
-                        Utils.Tween(opt, {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}, 0.2)
+                        Utils.Tween(opt, {BackgroundTransparency = 0.96, BackgroundColor3 = Color3.new(1, 1, 1)}, 0.2)
                     else
                         table.insert(dropdown.Selected, v)
-                        Utils.Tween(opt, {BackgroundColor3 = Configuration.Colors.Primary}, 0.2)
+                        Utils.Tween(opt, {BackgroundTransparency = 0.2, BackgroundColor3 = Configuration.Colors.Primary}, 0.2)
                     end
                     text.Text = name .. " (" .. #dropdown.Selected .. ")"
                     callback(dropdown.Selected)
@@ -793,38 +806,38 @@ function Library:CreateWindow(title, gameName)
             local input = {Value = ""}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 48)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.975
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             local stroke = Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(0.4, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
             local box = Instance.new("TextBox")
-            box.Size = UDim2.new(0.6, -24, 0.7, 0)
-            box.Position = UDim2.new(1, -12, 0.5, 0)
+            box.Size = UDim2.new(0.6, -28, 0.7, 0)
+            box.Position = UDim2.new(1, -14, 0.5, 0)
             box.AnchorPoint = Vector2.new(1, 0.5)
-            box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            box.BackgroundTransparency = 0.5
+            box.BackgroundColor3 = Color3.new(1, 1, 1)
+            box.BackgroundTransparency = 0.96
             box.Text = ""
-            box.PlaceholderText = placeholder or "Type here..."
+            box.PlaceholderText = placeholder or "Enter text..."
             box.TextColor3 = Configuration.Colors.TextMain
             box.PlaceholderColor3 = Configuration.Colors.TextMuted
-            box.TextSize = 12
+            box.TextSize = 13
             box.Font = Enum.Font.Gotham
             box.Parent = frame
-            Utils.Round(box, 6)
+            Utils.Round(box, 10)
 
             box.Focused:Connect(function()
                 Utils.Tween(stroke, {Transparency = 0.5, Thickness = 1.2}, 0.3)
@@ -844,35 +857,37 @@ function Library:CreateWindow(title, gameName)
             local binding = false
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 48)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
             local bindBtn = Instance.new("TextButton")
-            bindBtn.Size = UDim2.new(0, 60, 0, 22)
-            bindBtn.Position = UDim2.new(1, -72, 0.5, 0)
+            bindBtn.Size = UDim2.new(0, 70, 0, 26)
+            bindBtn.Position = UDim2.new(1, -84, 0.5, 0)
             bindBtn.AnchorPoint = Vector2.new(0, 0.5)
-            bindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            bindBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+            bindBtn.BackgroundTransparency = 0.95
             bindBtn.Text = keybind.Key.Name
             bindBtn.TextColor3 = Configuration.Colors.TextMain
             bindBtn.TextSize = 12
             bindBtn.Font = Enum.Font.GothamBold
             bindBtn.Parent = frame
-            Utils.Round(bindBtn, 6)
+            Utils.Round(bindBtn, 8)
+            Utils.Stroke(bindBtn, Color3.new(1, 1, 1), 1, 0.9)
 
             bindBtn.MouseButton1Click:Connect(function()
                 bindBtn.Text = "..."
@@ -892,78 +907,112 @@ function Library:CreateWindow(title, gameName)
         end
 
         function Tab:CreateColorpicker(name, default, callback)
-            local cp = {Color = default or Color3.new(1, 1, 1), Opened = false}
+            local colorpicker = {Color = default or Color3.fromRGB(255, 255, 255), Opened = false}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 48)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.ClipsDescendants = true
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
             local preview = Instance.new("Frame")
-            preview.Size = UDim2.new(0, 24, 0, 18)
-            preview.Position = UDim2.new(1, -36, 0.5, 0)
+            preview.Size = UDim2.new(0, 24, 0, 24)
+            preview.Position = UDim2.new(1, -38, 0.5, 0)
             preview.AnchorPoint = Vector2.new(0, 0.5)
-            preview.BackgroundColor3 = cp.Color
+            preview.BackgroundColor3 = colorpicker.Color
             preview.Parent = frame
-            Utils.Round(preview, 4)
+            Utils.Round(preview, 6)
+            Utils.Stroke(preview, Color3.new(1, 1, 1), 1, 0.8)
 
             local container = Instance.new("Frame")
             container.Size = UDim2.new(1, -20, 0, 100)
-            container.Position = UDim2.new(0, 10, 0, 40)
+            container.Position = UDim2.new(0, 10, 0, 48)
             container.BackgroundTransparency = 1
             container.Parent = frame
 
+            local function createSlider(prop, color)
+                local sframe = Instance.new("Frame")
+                sframe.Size = UDim2.new(1, 0, 0, 30)
+                sframe.BackgroundTransparency = 1
+                sframe.Parent = container
+
+                local track = Instance.new("Frame")
+                track.Size = UDim2.new(1, -20, 0, 4)
+                track.Position = UDim2.new(0, 10, 0.5, 0)
+                track.AnchorPoint = Vector2.new(0, 0.5)
+                track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                track.Parent = sframe
+                Utils.Round(track, 2)
+
+                local fill = Instance.new("Frame")
+                fill.Size = UDim2.fromScale(colorpicker.Color[prop], 1)
+                fill.BackgroundColor3 = color
+                fill.Parent = track
+                Utils.Round(fill, 2)
+
+                local interact = Instance.new("TextButton")
+                interact.Size = UDim2.fromScale(1, 1)
+                interact.BackgroundTransparency = 1
+                interact.Text = ""
+                interact.Parent = sframe
+
+                local dragging = false
+                local function update()
+                    local pos = math.clamp((UserInputService:GetMouseLocation().X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
+                    fill.Size = UDim2.fromScale(pos, 1)
+                    local r = prop == "R" and pos or colorpicker.Color.R
+                    local g = prop == "G" and pos or colorpicker.Color.G
+                    local b = prop == "B" and pos or colorpicker.Color.B
+                    colorpicker.Color = Color3.new(r, g, b)
+                    preview.BackgroundColor3 = colorpicker.Color
+                    callback(colorpicker.Color)
+                end
+
+                interact.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true update() end
+                end)
+                UserInputService.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+                end)
+                UserInputService.InputChanged:Connect(function(input)
+                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then update() end
+                end)
+            end
+
+            createSlider("R", Color3.fromRGB(255, 80, 80))
+            createSlider("G", Color3.fromRGB(80, 255, 80))
+            createSlider("B", Color3.fromRGB(80, 80, 255))
+            
+            local clist = Instance.new("UIListLayout")
+            clist.Padding = UDim.new(0, 2)
+            clist.Parent = container
+
             local interact = Instance.new("TextButton")
-            interact.Size = UDim2.new(1, 0, 0, 38)
+            interact.Size = UDim2.new(1, 0, 0, 48)
             interact.BackgroundTransparency = 1
             interact.Text = ""
             interact.Parent = frame
 
-            -- Simple implementation: 3 sliders for R, G, B
-            local rS = self:CreateSlider("Red", 0, 255, math.floor(cp.Color.R * 255), function(v)
-                cp.Color = Color3.fromRGB(v, math.floor(cp.Color.G * 255), math.floor(cp.Color.B * 255))
-                preview.BackgroundColor3 = cp.Color
-                callback(cp.Color)
-            end)
-            local gS = self:CreateSlider("Green", 0, 255, math.floor(cp.Color.G * 255), function(v)
-                cp.Color = Color3.fromRGB(math.floor(cp.Color.R * 255), v, math.floor(cp.Color.B * 255))
-                preview.BackgroundColor3 = cp.Color
-                callback(cp.Color)
-            end)
-            local bS = self:CreateSlider("Blue", 0, 255, math.floor(cp.Color.B * 255), function(v)
-                cp.Color = Color3.fromRGB(math.floor(cp.Color.R * 255), math.floor(cp.Color.G * 255), v)
-                preview.BackgroundColor3 = cp.Color
-                callback(cp.Color)
-            end)
-            
-            rS.Frame.Parent = container
-            gS.Frame.Parent = container
-            bS.Frame.Parent = container
-            rS.Frame.Size = UDim2.new(1, 0, 0, 30)
-            gS.Frame.Size = UDim2.new(1, 0, 0, 30)
-            bS.Frame.Size = UDim2.new(1, 0, 0, 30)
-
             interact.MouseButton1Click:Connect(function()
-                cp.Opened = not cp.Opened
-                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, cp.Opened and 150 or 38)}, 0.3)
+                colorpicker.Opened = not colorpicker.Opened
+                Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, colorpicker.Opened and 155 or 48)}, 0.3)
             end)
 
-            return cp
+            return colorpicker
         end
 
         function Tab:CreateLabel(name)
@@ -974,7 +1023,7 @@ function Library:CreateWindow(title, gameName)
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextSec
             text.TextSize = 13
@@ -982,100 +1031,80 @@ function Library:CreateWindow(title, gameName)
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = label
-            
-            function label:Set(val)
-                text.Text = val
-            end
-            
-            return label
         end
 
         function Tab:CreateParagraph(title, content)
-            local para = Instance.new("Frame")
-            para.Size = UDim2.new(0, 360, 0, 80)
-            para.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            para.BackgroundTransparency = 0.5
-            para.Parent = tabPage
-            Utils.Round(para, 10)
-            Utils.Stroke(para, Color3.new(1, 1, 1), 1, 0.95)
+            local frame = Instance.new("Frame")
+            frame.Size = UDim2.new(0, 360, 0, 0)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = tabPage
+            Utils.Round(frame, 14)
+            Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.96)
 
             local t = Instance.new("TextLabel")
-            t.Size = UDim2.new(1, -24, 0, 20)
-            t.Position = UDim2.new(0, 12, 0, 8)
+            t.Size = UDim2.new(1, -28, 0, 24)
+            t.Position = UDim2.new(0, 14, 0, 10)
             t.Text = title
             t.TextColor3 = Configuration.Colors.TextMain
-            t.TextSize = 13
+            t.TextSize = 14
             t.Font = Enum.Font.GothamBold
             t.TextXAlignment = Enum.TextXAlignment.Left
             t.BackgroundTransparency = 1
-            t.Parent = para
+            t.Parent = frame
 
             local c = Instance.new("TextLabel")
-            c.Size = UDim2.new(1, -24, 1, -34)
-            c.Position = UDim2.new(0, 12, 0, 28)
+            c.Size = UDim2.new(1, -28, 0, 0)
+            c.Position = UDim2.new(0, 14, 0, 34)
             c.Text = content
             c.TextColor3 = Configuration.Colors.TextSec
-            c.TextSize = 12
+            c.TextSize = 13
             c.Font = Enum.Font.Gotham
             c.TextXAlignment = Enum.TextXAlignment.Left
             c.TextYAlignment = Enum.TextYAlignment.Top
             c.TextWrapped = true
             c.BackgroundTransparency = 1
-            c.Parent = para
-
-            local function update()
-                para.Size = UDim2.new(0, 360, 0, c.TextBounds.Y + 40)
-            end
-            c:GetPropertyChangedSignal("TextBounds"):Connect(update)
-            update()
-
-            function para:Set(newTitle, newContent)
-                t.Text = newTitle
-                c.Text = newContent
-            end
-
-            return para
+            c.Parent = frame
+            
+            c:GetPropertyChangedSignal("TextBounds"):Connect(function()
+                c.Size = UDim2.new(1, -28, 0, c.TextBounds.Y)
+                frame.Size = UDim2.new(0, 360, 0, c.TextBounds.Y + 45)
+            end)
+            
+            c.Size = UDim2.new(1, -28, 0, c.TextBounds.Y)
+            frame.Size = UDim2.new(0, 360, 0, c.TextBounds.Y + 45)
         end
 
         function Tab:CreateDivider()
-            local divider = Instance.new("Frame")
-            divider.Size = UDim2.new(0, 360, 0, 20)
-            divider.BackgroundTransparency = 1
-            divider.Parent = tabPage
-
-            local line = Instance.new("Frame")
-            line.Size = UDim2.new(1, -20, 0, 1)
-            line.Position = UDim2.fromScale(0.5, 0.5)
-            line.AnchorPoint = Vector2.new(0.5, 0.5)
-            line.BackgroundColor3 = Configuration.Colors.TextMuted
-            line.BackgroundTransparency = 0.8
-            line.BorderSizePixel = 0
-            line.Parent = divider
+            local div = Instance.new("Frame")
+            div.Size = UDim2.new(0, 340, 0, 1)
+            div.BackgroundColor3 = Color3.new(1, 1, 1)
+            div.BackgroundTransparency = 0.94
+            div.BorderSizePixel = 0
+            div.Parent = tabPage
         end
 
         function Tab:CreateSearchBar(placeholder, callback)
-            local search = {Value = ""}
-            
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 44)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             local stroke = Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local icon = Instance.new("ImageLabel")
             icon.Size = UDim2.fromOffset(18, 18)
-            icon.Position = UDim2.new(0, 12, 0.5, 0)
+            icon.Position = UDim2.new(0, 14, 0.5, 0)
             icon.AnchorPoint = Vector2.new(0, 0.5)
-            icon.Image = "rbxassetid://10723344646" -- Search icon
+            icon.Image = "rbxassetid://10723344432"
             icon.ImageColor3 = Configuration.Colors.TextMuted
             icon.BackgroundTransparency = 1
             icon.Parent = frame
 
             local box = Instance.new("TextBox")
-            box.Size = UDim2.new(1, -44, 1, 0)
-            box.Position = UDim2.new(0, 36, 0, 0)
+            box.Size = UDim2.new(1, -50, 1, 0)
+            box.Position = UDim2.new(0, 42, 0, 0)
             box.Text = ""
             box.PlaceholderText = placeholder or "Search..."
             box.TextColor3 = Configuration.Colors.TextMain
@@ -1088,262 +1117,349 @@ function Library:CreateWindow(title, gameName)
 
             box.Focused:Connect(function()
                 Utils.Tween(stroke, {Transparency = 0.5, Thickness = 1.2}, 0.3)
-                Utils.Tween(icon, {ImageColor3 = Configuration.Colors.Primary}, 0.3)
             end)
 
             box.FocusLost:Connect(function()
                 Utils.Tween(stroke, {Transparency = 0.95, Thickness = 1}, 0.3)
-                Utils.Tween(icon, {ImageColor3 = Configuration.Colors.TextMuted}, 0.3)
             end)
 
             box:GetPropertyChangedSignal("Text"):Connect(function()
-                search.Value = box.Text
                 callback(box.Text)
             end)
 
-            return search
+            return box
         end
 
         function Tab:CreateTooltip(parent, text)
-            local tip = Instance.new("Frame")
-            tip.Size = UDim2.new(0, 100, 0, 20)
-            tip.BackgroundColor3 = Configuration.Colors.Bg
-            tip.BackgroundTransparency = 0.2
-            tip.Visible = false
-            tip.ZIndex = 2000
-            tip.Parent = game:GetService("CoreGui"):FindFirstChild(Configuration.ScreenGuiName)
-            Utils.Round(tip, 6)
-            Utils.Stroke(tip, Color3.new(1, 1, 1), 1, 0.9)
+            local tooltip = Instance.new("Frame")
+            tooltip.Size = UDim2.new(0, 0, 0, 24)
+            tooltip.BackgroundColor3 = Configuration.Colors.Bg
+            tooltip.BackgroundTransparency = 0.2
+            tooltip.ClipsDescendants = true
+            tooltip.ZIndex = 500
+            tooltip.Parent = screen
+            Utils.Round(tooltip, 6)
+            Utils.Stroke(tooltip, Color3.new(1, 1, 1), 1, 0.9)
 
-            local t = Instance.new("TextLabel")
-            t.Size = UDim2.fromScale(1, 1)
-            t.Text = text
-            t.TextColor3 = Color3.new(1, 1, 1)
-            t.TextSize = 11
-            t.Font = Enum.Font.GothamMedium
-            t.BackgroundTransparency = 1
-            t.Parent = tip
-            
-            tip.Size = UDim2.new(0, t.TextBounds.X + 16, 0, 20)
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(1, -12, 1, 0)
+            label.Position = UDim2.new(0, 6, 0, 0)
+            label.Text = text
+            label.TextColor3 = Configuration.Colors.TextMain
+            label.TextSize = 11
+            label.Font = Enum.Font.GothamMedium
+            label.BackgroundTransparency = 1
+            label.ZIndex = 501
+            label.Parent = tooltip
+
+            local function update()
+                local size = label.TextBounds.X + 24
+                tooltip.Size = UDim2.new(0, size, 0, 24)
+            end
+            label:GetPropertyChangedSignal("TextBounds"):Connect(update)
+            update()
 
             parent.MouseEnter:Connect(function()
-                tip.Visible = true
+                tooltip.Visible = true
+                Utils.Tween(tooltip, {BackgroundTransparency = 0.2}, 0.2)
             end)
-
             parent.MouseLeave:Connect(function()
-                tip.Visible = false
+                Utils.Tween(tooltip, {BackgroundTransparency = 1}, 0.2)
+                task.delay(0.2, function() tooltip.Visible = false end)
             end)
-
-            parent.MouseMoved:Connect(function()
-                local mouse = UserInputService:GetMouseLocation()
-                tip.Position = UDim2.new(0, mouse.X + 15, 0, mouse.Y + 15)
+            
+            RunService.RenderStepped:Connect(function()
+                if tooltip.Visible then
+                    local mouse = UserInputService:GetMouseLocation()
+                    tooltip.Position = UDim2.new(0, mouse.X + 15, 0, mouse.Y + 5)
+                end
             end)
+            
+            tooltip.Visible = false
         end
 
         function Tab:CreateCollapsible(name, opened)
-            local coll = {Opened = opened or false}
+            local collapsible = {Opened = opened or false}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 38)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 44)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.ClipsDescendants = true
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
-
-            local header = Instance.new("TextButton")
-            header.Size = UDim2.new(1, 0, 0, 38)
-            header.BackgroundTransparency = 1
-            header.Text = ""
-            header.Parent = frame
 
             local text = Instance.new("TextLabel")
             text.Size = UDim2.fromScale(1, 1)
-            text.Position = UDim2.new(0, 12, 0, 0)
+            text.Position = UDim2.new(0, 14, 0, 0)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 13
-            text.Font = Enum.Font.GothamBold
+            text.TextSize = 14
+            text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
             local arrow = Instance.new("ImageLabel")
             arrow.Size = UDim2.fromOffset(16, 16)
-            arrow.Position = UDim2.new(1, -28, 0.5, 0)
+            arrow.Position = UDim2.new(1, -30, 0.5, 0)
             arrow.AnchorPoint = Vector2.new(0, 0.5)
             arrow.Image = "rbxassetid://10709791437"
             arrow.ImageColor3 = Configuration.Colors.TextMuted
-            arrow.Rotation = coll.Opened and 180 or 0
             arrow.BackgroundTransparency = 1
             arrow.Parent = frame
 
             local container = Instance.new("Frame")
-            container.Size = UDim2.new(1, -20, 0, 0)
-            container.Position = UDim2.new(0, 10, 0, 38)
+            container.Size = UDim2.new(1, -10, 0, 0)
+            container.Position = UDim2.new(0, 5, 0, 44)
             container.BackgroundTransparency = 1
             container.Parent = frame
 
             local clist = Instance.new("UIListLayout")
-            clist.Padding = UDim.new(0, 8)
+            clist.Padding = UDim.new(0, 4)
             clist.Parent = container
 
             local function toggle(state)
-                coll.Opened = state
-                local targetSize = state and (38 + clist.AbsoluteContentSize.Y + 10) or 38
+                collapsible.Opened = state
+                local targetSize = state and (44 + clist.AbsoluteContentSize.Y + 10) or 44
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, targetSize)}, 0.3)
                 Utils.Tween(arrow, {Rotation = state and 180 or 0}, 0.3)
             end
 
-            header.MouseButton1Click:Connect(function()
-                toggle(not coll.Opened)
+            local interact = Instance.new("TextButton")
+            interact.Size = UDim2.new(1, 0, 0, 44)
+            interact.BackgroundTransparency = 1
+            interact.Text = ""
+            interact.Parent = frame
+
+            interact.MouseButton1Click:Connect(function()
+                toggle(not collapsible.Opened)
             end)
 
-            -- Mock Tab object to allow adding elements into the collapsible
-            local subTab = setmetatable({tabPage = container}, {__index = Tab})
-            return subTab
+            clist:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                if collapsible.Opened then toggle(true) end
+            end)
+
+            return setmetatable(collapsible, {__index = function(_, k) return self[k] end})
         end
 
         function Tab:CreateProgressBar(name, percent)
-            local bar = {Percent = percent or 0}
+            local progress = {Percent = percent or 0}
             
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 360, 0, 45)
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            frame.BackgroundTransparency = 0.5
+            frame.Size = UDim2.new(0, 360, 0, 60)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
             frame.Parent = tabPage
-            Utils.Round(frame, 10)
+            Utils.Round(frame, 14)
             Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
             local text = Instance.new("TextLabel")
-            text.Size = UDim2.new(1, 0, 0, 20)
-            text.Position = UDim2.new(0, 12, 0, 5)
+            text.Size = UDim2.new(1, 0, 0, 24)
+            text.Position = UDim2.new(0, 14, 0, 10)
             text.Text = name
             text.TextColor3 = Configuration.Colors.TextMain
-            text.TextSize = 12
+            text.TextSize = 14
             text.Font = Enum.Font.GothamMedium
             text.TextXAlignment = Enum.TextXAlignment.Left
             text.BackgroundTransparency = 1
             text.Parent = frame
 
+            local percText = Instance.new("TextLabel")
+            percText.Size = UDim2.new(0, 50, 0, 24)
+            percText.Position = UDim2.new(1, -64, 0, 10)
+            percText.Text = tostring(progress.Percent) .. "%"
+            percText.TextColor3 = Configuration.Colors.Primary
+            percText.TextSize = 13
+            percText.Font = Enum.Font.GothamBold
+            percText.TextXAlignment = Enum.TextXAlignment.Right
+            percText.BackgroundTransparency = 1
+            percText.Parent = frame
+
             local track = Instance.new("Frame")
-            track.Size = UDim2.new(1, -24, 0, 6)
-            track.Position = UDim2.new(0, 12, 1, -12)
+            track.Size = UDim2.new(1, -28, 0, 6)
+            track.Position = UDim2.new(0, 14, 1, -16)
             track.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            track.BorderSizePixel = 0
             track.Parent = frame
             Utils.Round(track, 3)
 
             local fill = Instance.new("Frame")
-            fill.Size = UDim2.fromScale(bar.Percent / 100, 1)
+            fill.Size = UDim2.fromScale(progress.Percent / 100, 1)
             fill.BackgroundColor3 = Configuration.Colors.Primary
-            fill.BorderSizePixel = 0
             fill.Parent = track
             Utils.Round(fill, 3)
+            Utils.CreateGradient(fill, Configuration.Colors.Primary, Configuration.Colors.PrimaryDark, 0)
 
-            function bar:Set(val)
-                bar.Percent = math.clamp(val, 0, 100)
-                Utils.Tween(fill, {Size = UDim2.fromScale(bar.Percent / 100, 1)}, 0.3)
+            function progress:Set(val)
+                progress.Percent = math.clamp(val, 0, 100)
+                percText.Text = tostring(progress.Percent) .. "%"
+                Utils.Tween(fill, {Size = UDim2.fromScale(progress.Percent / 100, 1)}, 0.3)
             end
 
-            return bar
-        end
-
-        function Tab:CreateBadge(parent, text, color)
-            local badge = Instance.new("Frame")
-            badge.Size = UDim2.new(0, 40, 0, 16)
-            badge.Position = UDim2.new(1, -10, 0.5, 0)
-            badge.AnchorPoint = Vector2.new(1, 0.5)
-            badge.BackgroundColor3 = color or Configuration.Colors.Primary
-            badge.BackgroundTransparency = 0.1
-            badge.Parent = parent
-            Utils.Round(badge, 4)
-
-            local t = Instance.new("TextLabel")
-            t.Size = UDim2.fromScale(1, 1)
-            t.Text = text:upper()
-            t.TextColor3 = Color3.new(1, 1, 1)
-            t.TextSize = 9
-            t.Font = Enum.Font.GothamBold
-            t.BackgroundTransparency = 1
-            t.Parent = badge
-            
-            badge.Size = UDim2.new(0, t.TextBounds.X + 10, 0, 16)
+            return progress
         end
 
         function Tab:CreateDiscordPrompt(invite)
-            local button = self:CreateButton("Join Discord Server", function()
+            local frame = Instance.new("Frame")
+            frame.Size = UDim2.new(0, 360, 0, 70)
+            frame.BackgroundColor3 = Color3.new(1, 1, 1)
+            frame.BackgroundTransparency = 0.96
+            frame.Parent = tabPage
+            Utils.Round(frame, 14)
+            Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
+
+            local icon = Instance.new("ImageLabel")
+            icon.Size = UDim2.fromOffset(36, 36)
+            icon.Position = UDim2.new(0, 14, 0.5, 0)
+            icon.AnchorPoint = Vector2.new(0, 0.5)
+            icon.Image = "rbxassetid://10709789930"
+            icon.ImageColor3 = Color3.fromRGB(88, 101, 242)
+            icon.BackgroundTransparency = 1
+            icon.Parent = frame
+
+            local title = Instance.new("TextLabel")
+            title.Size = UDim2.new(1, -150, 0, 20)
+            title.Position = UDim2.new(0, 60, 0, 15)
+            title.Text = "Join our Discord"
+            title.TextColor3 = Configuration.Colors.TextMain
+            title.TextSize = 14
+            title.Font = Enum.Font.GothamBold
+            title.TextXAlignment = Enum.TextXAlignment.Left
+            title.BackgroundTransparency = 1
+            title.Parent = frame
+
+            local sub = Instance.new("TextLabel")
+            sub.Size = UDim2.new(1, -150, 0, 15)
+            sub.Position = UDim2.new(0, 60, 0, 35)
+            sub.Text = "Get updates and support"
+            sub.TextColor3 = Configuration.Colors.TextSec
+            sub.TextSize = 12
+            sub.Font = Enum.Font.Gotham
+            sub.TextXAlignment = Enum.TextXAlignment.Left
+            sub.BackgroundTransparency = 1
+            sub.Parent = frame
+
+            local join = Instance.new("TextButton")
+            join.Size = UDim2.new(0, 80, 0, 32)
+            join.Position = UDim2.new(1, -14, 0.5, 0)
+            join.AnchorPoint = Vector2.new(1, 0.5)
+            join.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+            join.Text = "Join"
+            join.TextColor3 = Color3.new(1, 1, 1)
+            join.Font = Enum.Font.GothamBold
+            join.TextSize = 13
+            join.Parent = frame
+            Utils.Round(join, 10)
+
+            join.MouseButton1Click:Connect(function()
                 setclipboard(invite)
-                Library:Notify("Discord", "Invite link copied to clipboard!", "success")
+                Library:Notify("Invite link copied to clipboard!", "success", 3)
             end)
-            self:CreateBadge(button.Frame, "Discord", Color3.fromRGB(88, 101, 242))
         end
 
         function Tab:CreateCredits(credits)
             local _section = self:CreateSection("Credits")
             for _, info in ipairs(credits) do
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(0, 360, 0, 40)
-                frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-                frame.BackgroundTransparency = 0.5
+                frame.Size = UDim2.new(0, 360, 0, 56)
+                frame.BackgroundColor3 = Color3.new(1, 1, 1)
+                frame.BackgroundTransparency = 0.96
                 frame.Parent = tabPage
-                Utils.Round(frame, 10)
-                
-                local name = Instance.new("TextLabel")
-                name.Size = UDim2.new(0.5, -12, 1, 0)
-                name.Position = UDim2.new(0, 12, 0, 0)
-                name.Text = info.Name
-                name.TextColor3 = Configuration.Colors.TextMain
-                name.TextSize = 13
-                name.Font = Enum.Font.GothamBold
-                name.TextXAlignment = Enum.TextXAlignment.Left
-                name.BackgroundTransparency = 1
-                name.Parent = frame
+                Utils.Round(frame, 14)
+                Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.95)
 
-                local role = Instance.new("TextLabel")
-                role.Size = UDim2.new(0.5, -12, 1, 0)
-                role.Position = UDim2.new(0.5, 0, 0, 0)
-                role.Text = info.Role
-                role.TextColor3 = Configuration.Colors.TextSec
-                role.TextSize = 12
-                role.Font = Enum.Font.Gotham
-                role.TextXAlignment = Enum.TextXAlignment.Right
-                role.BackgroundTransparency = 1
-                role.Parent = frame
+                local title = Instance.new("TextLabel")
+                title.Size = UDim2.new(1, -30, 0, 20)
+                title.Position = UDim2.new(0, 15, 0, 10)
+                title.Text = info.Name
+                title.TextColor3 = Configuration.Colors.TextMain
+                title.TextSize = 14
+                title.Font = Enum.Font.GothamBold
+                title.TextXAlignment = Enum.TextXAlignment.Left
+                title.BackgroundTransparency = 1
+                title.Parent = frame
+
+                local sub = Instance.new("TextLabel")
+                sub.Size = UDim2.new(1, -30, 0, 15)
+                sub.Position = UDim2.new(0, 15, 0, 30)
+                sub.Text = info.Role
+                sub.TextColor3 = Configuration.Colors.TextSec
+                sub.TextSize = 12
+                sub.Font = Enum.Font.Gotham
+                sub.TextXAlignment = Enum.TextXAlignment.Left
+                sub.BackgroundTransparency = 1
+                sub.Parent = frame
             end
         end
 
-    function Library:CreateWatermark(text)
-        local wm = Instance.new("Frame")
-        wm.Size = UDim2.new(0, 100, 0, 24)
-        wm.Position = UDim2.new(0, 10, 0, 10)
-        wm.BackgroundColor3 = Configuration.Colors.Bg
-        wm.BackgroundTransparency = 0.2
-        wm.Parent = game:GetService("CoreGui"):FindFirstChild(Configuration.ScreenGuiName)
-        Utils.Round(wm, 6)
-        Utils.Stroke(wm, Color3.new(1, 1, 1), 1, 0.9)
+        return Tab
+    end
 
-        local t = Instance.new("TextLabel")
-        t.Size = UDim2.fromScale(1, 1)
-        t.Text = text or "Antigravity | " .. Window.GameName
-        t.TextColor3 = Color3.new(1, 1, 1)
-        t.TextSize = 11
-        t.Font = Enum.Font.GothamMedium
-        t.BackgroundTransparency = 1
-        t.Parent = wm
+    function Library:CreateWatermark(text)
+        local wm = {Text = text}
         
-        wm.Size = UDim2.new(0, t.TextBounds.X + 20, 0, 24)
-        
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(0, 200, 0, 32)
+        frame.Position = UDim2.new(0, 40, 0, 40)
+        frame.BackgroundColor3 = Configuration.Colors.Bg
+        frame.BackgroundTransparency = 0.2
+        frame.Parent = screen
+        Utils.Round(frame, 10)
+        Utils.Stroke(frame, Color3.new(1, 1, 1), 1, 0.92)
+
+        local glass = Instance.new("Frame")
+        glass.Size = UDim2.fromScale(1, 1)
+        glass.BackgroundColor3 = Color3.new(1, 1, 1)
+        glass.BackgroundTransparency = 0.985
+        glass.Parent = frame
+        Utils.Round(glass, 10)
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, -20, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.TextSize = 12
+        label.Font = Enum.Font.GothamBold
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.BackgroundTransparency = 1
+        label.Parent = frame
+
+        Utils.CreateGradient(frame, Configuration.Colors.Bg, Color3.fromRGB(20, 20, 20), 45)
+
         function wm:Set(newText)
-            t.Text = newText
-            wm.Size = UDim2.new(0, t.TextBounds.X + 20, 0, 24)
+            wm.Text = newText
+            label.Text = newText
+            local size = label.TextBounds.X + 30
+            Utils.Tween(frame, {Size = UDim2.new(0, size, 0, 32)}, 0.3)
         end
-        
+        wm:Set(text)
+
+        -- Dragging for Watermark --
+        local dragging, dragStart, startPos
+        frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                dragStart = input.Position
+                startPos = frame.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local delta = input.Position - dragStart
+                frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+
         return wm
     end
-        
-        return Tab
+
+    function Library:Notify(message, toastType, duration)
+        ToastSystem.Create(screen, message, toastType, duration)
     end
 
     return Window
