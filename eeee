@@ -48,7 +48,8 @@ local Configuration = {
     Settings = {
         TweenSpeed = 0.3,
         TweenStyle = Enum.EasingStyle.Quint,
-        DraggingSpeed = 0.05
+        DraggingSpeed = 0.05,
+        BlurIntensity = 10
     }
 }
 
@@ -125,13 +126,13 @@ end
 
 local function SetBlur(state)
     local blur = Lighting:FindFirstChild("GlassBlur")
-    if state then
+    if state and Configuration.Settings.BlurIntensity > 0 then
         if not blur then
             blur = Instance.new("BlurEffect")
             blur.Name = "GlassBlur"
             blur.Parent = Lighting
         end
-        Utils.Tween(blur, {Size = 10}, Configuration.Settings.TweenSpeed)
+        Utils.Tween(blur, {Size = Configuration.Settings.BlurIntensity}, Configuration.Settings.TweenSpeed)
     elseif blur then
         Utils.Tween(blur, {Size = 0}, Configuration.Settings.TweenSpeed)
         task.delay(Configuration.Settings.TweenSpeed, function() 
@@ -227,7 +228,7 @@ function ToastSystem.Create(parent, message, toastType, duration, statusCode)
     toast.Size = UDim2.new(0, 100, 0, toastHeight) -- Initial small size for pop effect
     Utils.Tween(toast, {Size = UDim2.new(0, 320, 0, toastHeight)}, Configuration.Animations.Bounce)
 
-    task.delay(duration or 3.5, function()
+    task.delay(tonumber(duration) or 3.5, function()
         if toast.Parent then
             Utils.Tween(toast, {Position = UDim2.new(0.5, 0, 0, -80), BackgroundTransparency = 1}, Configuration.Animations.Medium)
             for i, t in ipairs(ToastSystem.ActiveToasts) do
@@ -1116,10 +1117,10 @@ function Library:CreateWindow(title, gameName)
             cursor.AnchorPoint = Vector2.new(0.5, 0.5)
             cursor.BackgroundColor3 = Color3.new(1, 1, 1)
             cursor.Position = UDim2.fromScale(colorpicker.Sat, 1 - colorpicker.Val)
-            cursor.ZIndex = 2002
+            cursor.ZIndex = 2005
             cursor.Parent = svPicker
             Utils.Round(cursor, 2)
-            Utils.Stroke(cursor, Color3.new(0, 0, 0), 1, 0)
+            Utils.Stroke(cursor, Color3.new(0, 0, 0), 1, 0.5)
 
             local huePicker = Instance.new("ImageLabel")
             huePicker.Size = UDim2.new(0, 20, 0, 150)
@@ -1612,8 +1613,12 @@ function Library:CreateWindow(title, gameName)
             Utils.Round(join, 10)
 
             join.MouseButton1Click:Connect(function()
-                setclipboard(invite)
-                Library:Notify("Invite link copied to clipboard!", "success", 3)
+                if setclipboard then
+                    setclipboard(invite)
+                    Library:Notify("Invite link copied to clipboard!", "success", 3)
+                else
+                    Library:Notify("Failed to copy! Clipboard not supported.", "error", 3)
+                end
             end)
         end
 
@@ -1717,7 +1722,7 @@ function Library:CreateWindow(title, gameName)
         return wm
     end
 
-    function Library:Notify(message, duration, toastType)
+    function Library:Notify(message, toastType, duration)
         ToastSystem.Create(screen, message, toastType, duration)
     end
 
@@ -1734,6 +1739,11 @@ function Library:CreateWindow(title, gameName)
 
     function Library:SetDraggingSpeed(speed)
         Configuration.Settings.DraggingSpeed = speed
+    end
+
+    function Library:SetBlurIntensity(val)
+        Configuration.Settings.BlurIntensity = val
+        SetBlur(toggled)
     end
 
     return Window
