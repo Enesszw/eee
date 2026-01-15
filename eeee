@@ -217,7 +217,10 @@ function ToastSystem.Create(parent, message, toastType, duration, statusCode)
         if toast.Parent then
             Utils.Tween(toast, {Position = UDim2.new(0.5, 0, 0, -80), BackgroundTransparency = 1}, Configuration.Animations.Medium)
             for i, t in ipairs(ToastSystem.ActiveToasts) do
-                if t == toast then table.remove(ToastSystem.ActiveToasts, i) break end
+                if t == toast then
+                    table.remove(ToastSystem.ActiveToasts, i)
+                    break
+                end
             end
             task.wait(0.4)
             toast:Destroy()
