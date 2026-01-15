@@ -257,154 +257,122 @@ function Library:Notify(message, toastType, duration)
 end
 
 -- [ Window Management ] --
-function Library:CreateWindow(title, gameName)
-    local Window = {
-        Tabs = {},
-        ActiveTab = nil,
-        WindowName = title or "Antigravity",
-        GameName = gameName or "Universal"
-    }
+    function Library:CreateWindow(name, gameName)
+        local Window = {ActiveTab = nil}
 
-    local screen = Instance.new("ScreenGui")
-    screen.Name = Configuration.ScreenGuiName
-    screen.ResetOnSpawn = false
-    screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    screen.Parent = game:GetService("CoreGui")
-
-    local main = Instance.new("Frame")
-    main.Size = UDim2.new(0, 580, 0, 420)
-    main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    main.AnchorPoint = Vector2.new(0.5, 0.5)
-    main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    main.BackgroundTransparency = 0.13
-    main.ClipsDescendants = true
-    main.Parent = screen
-    Utils.Round(main, 33)
-    Utils.Stroke(main, Color3.new(1, 1, 1), 1, 0.92)
-
-    local glass = Instance.new("Frame")
-    glass.Size = UDim2.fromScale(1, 1)
-    glass.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    glass.BackgroundTransparency = 0.87
-    glass.ZIndex = 0
-    glass.Parent = main
-    Utils.Round(glass, 33)
-
-    local blur = game:GetService("Lighting"):FindFirstChild("GlassBlur")
-    if not blur then
-        blur = Instance.new("BlurEffect")
-        blur.Name = "GlassBlur"
-        blur.Parent = game:GetService("Lighting")
-    end
-    SetBlur(true)
-
-    -- Toggle Logic --
-    Library.Toggled = true
-    UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if input.KeyCode == Enum.KeyCode.RightShift or input.KeyCode == Enum.KeyCode.Insert then
-            Library.Toggled = not Library.Toggled
-            main.Visible = Library.Toggled
-            SetBlur(Library.Toggled)
+        -- Strict Cleanup: Delete all zombie blurs
+        for _, obj in ipairs(Lighting:GetChildren()) do
+            if obj:IsA("BlurEffect") then
+                obj:Destroy()
+            end
         end
-    end)
 
-    -- Title Bar / Bar with Traffic Lights --
-    local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(1, 0, 0, 44)
-    bar.BackgroundTransparency = 1
-    bar.Parent = main
-    
-    local dots = Instance.new("Frame")
-    dots.Size = UDim2.new(0, 54, 0, 12)
-    dots.Position = UDim2.new(0, 20, 0.5, 0)
-    dots.AnchorPoint = Vector2.new(0, 0.5)
-    dots.BackgroundTransparency = 1
-    dots.Parent = bar
+        local screen = Instance.new("ScreenGui")
+        screen.Name = "AntigravityHub"
+        screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        if gethui then screen.Parent = gethui()
+        elseif syn and syn.protect_gui then syn.protect_gui(screen); screen.Parent = game:GetService("CoreGui")
+        elseif game:GetService("CoreGui"):FindFirstChild("RobloxGui") then screen.Parent = game:GetService("CoreGui"):FindFirstChild("RobloxGui")
+        else screen.Parent = game:GetService("CoreGui") end
 
-    local dColors = {
-        Configuration.Colors.TrafficRed,
-        Configuration.Colors.TrafficYellow,
-        Configuration.Colors.TrafficGreen
-    }
-    for i, c in ipairs(dColors) do
-        local d = Instance.new("Frame")
-        d.Size = UDim2.fromOffset(10, 10)
-        d.Position = UDim2.fromOffset((i - 1) * 16, 0)
-        d.BackgroundColor3 = c
-        d.BorderSizePixel = 0
-        d.Parent = dots
-        Utils.Round(d, 5)
-    end
+        local main = Instance.new("Frame")
+        main.Size = UDim2.fromOffset(600, 400)
+        main.Position = UDim2.fromScale(0.5, 0.5)
+        main.AnchorPoint = Vector2.new(0.5, 0.5)
+        main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        main.BackgroundTransparency = 0.13
+        main.BorderSizePixel = 0
+        main.Parent = screen
+        Utils.Round(main, 33)
+        Utils.Stroke(main, Color3.new(1, 1, 1), 1, 0.95)
 
-    local titleText = Instance.new("TextLabel")
-    titleText.Size = UDim2.new(1, 0, 1, 0)
-    titleText.Text = Window.WindowName:upper()
-    titleText.TextColor3 = Color3.new(1, 1, 1)
-    titleText.TextTransparency = 0.7
-    titleText.TextSize = 9
-    titleText.Font = Enum.Font.GothamBold
-    titleText.BackgroundTransparency = 1
-    titleText.Parent = bar
+        local sidebar = Instance.new("Frame")
+        sidebar.Size = UDim2.new(0, 160, 1, 0)
+        sidebar.BackgroundColor3 = Color3.new(1, 1, 1)
+        sidebar.BackgroundTransparency = 0.985
+        sidebar.BorderSizePixel = 0
+        sidebar.Parent = main
+        Utils.Round(sidebar, 33)
 
-    -- Sidebar --
-    local sidebar = Instance.new("Frame")
-    sidebar.Size = UDim2.new(0, 170, 1, -44)
-    sidebar.Position = UDim2.new(0, 0, 0, 44)
-    sidebar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    sidebar.BackgroundTransparency = 0.4
-    sidebar.Parent = main
-    Utils.Round(sidebar, 24)
-    
-    local sidebarPad = Instance.new("UIPadding")
-    sidebarPad.PaddingTop = UDim.new(0, 10)
-    sidebarPad.PaddingLeft = UDim.new(0, 15)
-    sidebarPad.PaddingRight = UDim.new(0, 15)
-    sidebarPad.Parent = sidebar
+        local titleBar = Instance.new("Frame")
+        titleBar.Size = UDim2.new(1, 0, 0, 40)
+        titleBar.BackgroundTransparency = 1
+        titleBar.Parent = main
 
-    local tabContainer = Instance.new("ScrollingFrame")
-    tabContainer.Size = UDim2.new(1, 0, 1, -10)
-    tabContainer.BackgroundTransparency = 1
-    tabContainer.ScrollBarThickness = 0
-    tabContainer.Parent = sidebar
-    
-    local tabList = Instance.new("UIListLayout")
-    tabList.Padding = UDim.new(0, 6)
-    tabList.Parent = tabContainer
+        local trafficLights = Instance.new("Frame")
+        trafficLights.Size = UDim2.new(0, 60, 1, 0)
+        trafficLights.Position = UDim2.new(0, 15, 0, 0)
+        trafficLights.BackgroundTransparency = 1
+        trafficLights.Parent = titleBar
 
-    -- Content Area --
-    local contentArea = Instance.new("Frame")
-    contentArea.Size = UDim2.new(1, -170, 1, -44)
-    contentArea.Position = UDim2.new(0, 170, 0, 44)
-    contentArea.BackgroundTransparency = 1
-    contentArea.Parent = main
-
-    local tabPages = Instance.new("Frame")
-    tabPages.Size = UDim2.fromScale(1, 1)
-    tabPages.BackgroundTransparency = 1
-    tabPages.Parent = contentArea
-
-    -- Dragging Logic (Targeting 'bar') --
-    local dragging, dragStart, startPos
-    bar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = main.Position
+        local colors = {Color3.fromRGB(255, 95, 87), Color3.fromRGB(255, 189, 46), Color3.fromRGB(40, 201, 64)}
+        for i, color in ipairs(colors) do
+            local light = Instance.new("Frame")
+            light.Size = UDim2.fromOffset(11, 11)
+            light.Position = UDim2.new(0, (i-1) * 18, 0.5, 0)
+            light.AnchorPoint = Vector2.new(0, 0.5)
+            light.BackgroundColor3 = color
+            light.BorderSizePixel = 0
+            light.Parent = trafficLights
+            Utils.Round(light, 6)
         end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-    end)
 
-    -- Tab Builder --
-    function Window:CreateTab(name, icon)
+        local titleLBL = Instance.new("TextLabel")
+        titleLBL.Size = UDim2.new(1, 0, 1, 0)
+        titleLBL.Text = string.upper(name or "ANTIGRAVITY HUB")
+        titleLBL.TextColor3 = Configuration.Colors.TextSec
+        titleLBL.TextSize = 10
+        titleLBL.Font = Enum.Font.GothamBold
+        titleLBL.BackgroundTransparency = 1
+        titleLBL.Parent = titleBar
+
+        local tabContainer = Instance.new("ScrollingFrame")
+        tabContainer.Size = UDim2.new(1, -24, 1, -80)
+        tabContainer.Position = UDim2.new(0, 12, 0, 60)
+        tabContainer.BackgroundTransparency = 1
+        tabContainer.ScrollBarThickness = 0
+        tabContainer.Parent = sidebar
+
+        local tabPages = Instance.new("Frame")
+        tabPages.Size = UDim2.new(1, -180, 1, -60)
+        tabPages.Position = UDim2.new(0, 170, 0, 50)
+        tabPages.BackgroundTransparency = 1
+        tabPages.Parent = main
+
+        -- Dragging logic
+        local dragging, dragStart, startPos
+        titleBar.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                dragStart = input.Position
+                startPos = main.Position
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local delta = input.Position - dragStart
+                main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+        end)
+
+        -- Initial blur
+        SetBlur(true)
+
+        -- Toggle logic
+        Library.Toggled = true
+        UserInputService.InputBegan:Connect(function(input, gpe)
+            if gpe then return end
+            if input.KeyCode == Enum.KeyCode.RightShift or input.KeyCode == Enum.KeyCode.Insert then
+                Library.Toggled = not Library.Toggled
+                main.Visible = Library.Toggled
+                SetBlur(Library.Toggled)
+            end
+        end)
+
+        function Window:CreateTab(name, icon)
         local Tab = {Visible = false}
         
         local tabBtn = Instance.new("TextButton")
@@ -1167,13 +1135,26 @@ function Library:CreateWindow(title, gameName)
             Utils.Round(cursor, 2)
             Utils.Stroke(cursor, Color3.new(0, 0, 0), 1, 0.5)
 
-            local huePicker = Instance.new("ImageLabel")
+            local huePicker = Instance.new("Frame")
             huePicker.Size = UDim2.new(0, 20, 0, 150)
             huePicker.Position = UDim2.new(0, 200, 0, 40)
-            huePicker.Image = "rbxassetid://15629161241"
+            huePicker.BackgroundColor3 = Color3.new(1, 1, 1)
             huePicker.ZIndex = 2001
             huePicker.Parent = popup
             Utils.Round(huePicker, 4)
+
+            local hueGradient = Instance.new("UIGradient")
+            hueGradient.Rotation = 90
+            hueGradient.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromHSV(0, 1, 1)),
+                ColorSequenceKeypoint.new(0.16, Color3.fromHSV(0.16, 1, 1)),
+                ColorSequenceKeypoint.new(0.33, Color3.fromHSV(0.33, 1, 1)),
+                ColorSequenceKeypoint.new(0.49, Color3.fromHSV(0.49, 1, 1)),
+                ColorSequenceKeypoint.new(0.66, Color3.fromHSV(0.66, 1, 1)),
+                ColorSequenceKeypoint.new(0.83, Color3.fromHSV(0.83, 1, 1)),
+                ColorSequenceKeypoint.new(1, Color3.fromHSV(1, 1, 1))
+            })
+            hueGradient.Parent = huePicker
 
             local hCursor = Instance.new("Frame")
             hCursor.Size = UDim2.new(1, 0, 0, 2)
