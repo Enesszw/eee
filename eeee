@@ -1,4 +1,4 @@
-local Library = {}
+local Library = {Toggled = true}
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -136,7 +136,7 @@ local function SetBlur(state)
     elseif blur then
         Utils.Tween(blur, {Size = 0}, Configuration.Settings.TweenSpeed)
         task.delay(Configuration.Settings.TweenSpeed, function() 
-            if Lighting:FindFirstChild("GlassBlur") and not state then
+            if Lighting:FindFirstChild("GlassBlur") and not Library.Toggled then
                 blur:Destroy() 
             end
         end)
@@ -291,13 +291,13 @@ function Library:CreateWindow(title, gameName)
     SetBlur(true)
 
     -- Toggle Logic --
-    local toggled = true
+    Library.Toggled = true
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end
         if input.KeyCode == Enum.KeyCode.RightShift or input.KeyCode == Enum.KeyCode.Insert then
-            toggled = not toggled
-            main.Visible = toggled
-            SetBlur(toggled)
+            Library.Toggled = not Library.Toggled
+            main.Visible = Library.Toggled
+            SetBlur(Library.Toggled)
         end
     end)
 
@@ -428,13 +428,19 @@ function Library:CreateWindow(title, gameName)
         tabTitle.BackgroundTransparency = 1
         tabTitle.Parent = tabBtn
 
+        local tabCanvas = Instance.new("CanvasGroup")
+        tabCanvas.Size = UDim2.fromScale(1, 1)
+        tabCanvas.BackgroundTransparency = 1
+        tabCanvas.Visible = false
+        tabCanvas.GroupTransparency = 1
+        tabCanvas.Parent = tabPages
+
         local tabPage = Instance.new("ScrollingFrame")
         tabPage.Size = UDim2.fromScale(1, 1)
         tabPage.BackgroundTransparency = 1
-        tabPage.Visible = false
         tabPage.ScrollBarThickness = 0
         tabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
-        tabPage.Parent = tabPages
+        tabPage.Parent = tabCanvas
 
         local pageList = Instance.new("UIListLayout")
         pageList.Padding = UDim.new(0, 12)
@@ -451,16 +457,25 @@ function Library:CreateWindow(title, gameName)
 
         function Tab:Select()
             if Window.ActiveTab then
-                Utils.Tween(Window.ActiveTab.Btn, {BackgroundTransparency = 1}, 0.2)
-                Utils.Tween(Window.ActiveTab.Icon, {ImageColor3 = Configuration.Colors.TextSec}, 0.2)
-                Utils.Tween(Window.ActiveTab.Title, {TextColor3 = Configuration.Colors.TextSec}, 0.2)
-                Window.ActiveTab.Page.Visible = false
+                local prevTab = Window.ActiveTab
+                Utils.Tween(prevTab.Btn, {BackgroundTransparency = 1}, 0.2)
+                Utils.Tween(prevTab.Icon, {ImageColor3 = Configuration.Colors.TextSec}, 0.2)
+                Utils.Tween(prevTab.Title, {TextColor3 = Configuration.Colors.TextSec}, 0.2)
+                
+                Utils.Tween(prevTab.Canvas, {GroupTransparency = 1, Position = UDim2.fromOffset(0, 10)}, Configuration.Settings.TweenSpeed)
+                task.delay(Configuration.Settings.TweenSpeed, function()
+                    prevTab.Canvas.Visible = false
+                end)
             end
-            Window.ActiveTab = {Btn = tabBtn, Icon = tabIcon, Title = tabTitle, Page = tabPage}
+            Window.ActiveTab = {Btn = tabBtn, Icon = tabIcon, Title = tabTitle, Page = tabPage, Canvas = tabCanvas}
             Utils.Tween(tabBtn, {BackgroundTransparency = 0.94}, 0.2)
             Utils.Tween(tabIcon, {ImageColor3 = Configuration.Colors.Primary}, 0.2)
             Utils.Tween(tabTitle, {TextColor3 = Configuration.Colors.TextMain}, 0.2)
-            tabPage.Visible = true
+            
+            tabCanvas.Visible = true
+            tabCanvas.Position = UDim2.fromOffset(0, 10)
+            tabCanvas.GroupTransparency = 1
+            Utils.Tween(tabCanvas, {GroupTransparency = 0, Position = UDim2.fromOffset(0, 0)}, Configuration.Settings.TweenSpeed)
         end
 
             -- Hover & Click Animations --
@@ -1063,7 +1078,7 @@ function Library:CreateWindow(title, gameName)
             Utils.Round(preview, 6)
             Utils.Stroke(preview, Color3.new(1, 1, 1), 1, 0.8)
 
-            local popup = Instance.new("Frame")
+            local popup = Instance.new("CanvasGroup")
             popup.Size = UDim2.new(0, 240, 0, 250)
             popup.Position = UDim2.new(0.5, 0, 0.5, 0)
             popup.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1071,9 +1086,14 @@ function Library:CreateWindow(title, gameName)
             popup.BorderSizePixel = 0
             popup.Visible = false
             popup.ZIndex = 2000
+            popup.GroupTransparency = 1
             popup.Parent = screen
             Utils.Round(popup, 12)
             Utils.Stroke(popup, Color3.new(1, 1, 1), 1, 0.1)
+
+            local pScale = Instance.new("UIScale")
+            pScale.Scale = 0.8
+            pScale.Parent = popup
 
             local pTitle = Instance.new("Frame")
             pTitle.Size = UDim2.new(1, 0, 0, 30)
@@ -1102,7 +1122,24 @@ function Library:CreateWindow(title, gameName)
             close.TextColor3 = Color3.new(1, 1, 1)
             close.TextSize = 20
             close.Parent = pTitle
-            close.MouseButton1Click:Connect(function() popup.Visible = false end)
+
+            local function togglePopup(state)
+                if state then
+                    popup.Visible = true
+                    popup.Position = UDim2.new(0, UserInputService:GetMouseLocation().X + 130, 0, UserInputService:GetMouseLocation().Y)
+                    Utils.Tween(popup, {GroupTransparency = 0}, Configuration.Settings.TweenSpeed)
+                    Utils.Tween(pScale, {Scale = 1}, Configuration.Settings.TweenSpeed, Enum.EasingStyle.Back)
+                else
+                    Utils.Tween(popup, {GroupTransparency = 1}, Configuration.Settings.TweenSpeed)
+                    Utils.Tween(pScale, {Scale = 0.8}, Configuration.Settings.TweenSpeed)
+                    task.delay(Configuration.Settings.TweenSpeed, function()
+                        popup.Visible = false
+                    end)
+                end
+                colorpicker.Opened = state
+            end
+
+            close.MouseButton1Click:Connect(function() togglePopup(false) end)
 
             local svPicker = Instance.new("ImageLabel")
             svPicker.Size = UDim2.new(0, 180, 0, 150)
@@ -1125,7 +1162,7 @@ function Library:CreateWindow(title, gameName)
             local huePicker = Instance.new("ImageLabel")
             huePicker.Size = UDim2.new(0, 20, 0, 150)
             huePicker.Position = UDim2.new(0, 200, 0, 40)
-            huePicker.Image = "rbxassetid://3641079629"
+            huePicker.Image = "rbxassetid://2323933364"
             huePicker.ZIndex = 2001
             huePicker.Parent = popup
 
@@ -1240,10 +1277,7 @@ function Library:CreateWindow(title, gameName)
             end)
             interact.MouseButton1Up:Connect(function()
                 Utils.Tween(frame, {Size = UDim2.new(0, 360, 0, 48)}, Configuration.Animations.VeryFast)
-                popup.Visible = not popup.Visible
-                if popup.Visible then
-                    popup.Position = UDim2.new(0, UserInputService:GetMouseLocation().X + 130, 0, UserInputService:GetMouseLocation().Y)
-                end
+                togglePopup(not colorpicker.Opened)
             end)
 
             return colorpicker
@@ -1743,7 +1777,7 @@ function Library:CreateWindow(title, gameName)
 
     function Library:SetBlurIntensity(val)
         Configuration.Settings.BlurIntensity = val
-        SetBlur(toggled)
+        SetBlur(Library.Toggled)
     end
 
     return Window
